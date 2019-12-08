@@ -1,4 +1,12 @@
-import works_list
+import gather.works_list
+import yaml
 
-works_list.get_works_list ("The Mandalorian (TV)", type_of='works', sort='date_posted', date_from='2019-12-05')
+try:
+    with open('config.yaml', 'r') as file:
+        config = yaml.safe_load(file)
+        output_file = config['files']['output']
+except Exception as e:
+    print('Error reading yaml configuration file.')
+
+gather.works_list.get_works_list (output_file, "The Mandalorian (TV)", type_of='works', sort='date_posted', date_from='')
 #works_list.get_works_list ("Star Wars - All Media Types", type_of='works', sort='date_posted', date_from='2019-12-04')

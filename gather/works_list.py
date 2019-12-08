@@ -53,20 +53,18 @@ def gen_urls(url_params, type_of, max_pages):
         yield url
     return
 
-def get_works_list(tag, type_of, sort, date_from):
-
+def get_works_list(output_file, tag, type_of, sort, date_from):
 
     base_url, url_params = initial_url(tag, type_of, sort, date_from)
-
     print("Searching for work id's starting on page 1 here: ", base_url)
 
     with urllib.request.urlopen(base_url) as f:
         soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
     work_blurb_groups = soup.find_all(class_="work blurb group")
-    with open('works_list.txt', "w") as out:
+    with open(output_file, "w") as out:
             out.write(base_url+"\n")
     for work in work_blurb_groups:
-        with open('works_list.txt', "a") as out:
+        with open(output_file, "a") as out:
             a = work.find('a').get('href').lstrip('/works/')
             out.write(a+"\n")
     
@@ -95,7 +93,7 @@ def get_works_list(tag, type_of, sort, date_from):
             soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
         work_blurb_groups = soup.find_all(class_="work blurb group")
         for work in work_blurb_groups:
-            with open('works_list.txt', "a") as out:
+            with open(output_file, "a") as out:
                 x = work.find('a').get('href').lstrip('/works/')
                 out.write(x+"\n")
 
