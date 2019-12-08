@@ -11,3 +11,7 @@ def scrape_page(id):
     # responses
 
     return fanWork
+
+def scrap_blurb(soup_node):
+    #return fanwork = Work() 
+    pass
