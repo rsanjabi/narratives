@@ -1,4 +1,5 @@
 # Class defining work data structure
+import urllib
 
 class Work:
     def __init__(self, id):
@@ -51,3 +52,17 @@ class Bookmark:
         self.tags = tags
         self.date = date
         self.comments = comments
+
+class Search:
+    def __init__(self, type_of, config):
+        self.type_of = type_of
+        self.params = config
+
+    def generateURL(self, page=1):
+        # generate urls
+
+        self.params['page'] = page
+        params = urllib.parse.urlencode(self.params)
+        url = "https://archiveofourown.org/" + self.type_of + "?%s" % params
+
+        return url

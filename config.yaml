@@ -1,5 +1,21 @@
 ---
 files:
   output: 'data/work_id_list.txt'
-tags: 'The Mandalorian (TV)'
+params:
+  utf8: '✓'                                    # Don't alter
+  commit: 'Sort and Filter'                    # Don't alter 
+  work_search[sort_column]: 'created_at'       # or 'date_posted'
+  work_search[other_tag_names]: '' 
+  work_search[excluded_tag_names]: ''
+  work_search[crossover]: ''
+  work_search[complete]: ''
+  work_search[words_from]: ''
+  work_search[words_to]: ''
+  work_search[date_from]: ''
+  work_search[date_to]: ''
+  work_search[query]: ''
+  work_search[language_id]: ''
+  tag_id: 'The Mandalorian (TV)'
+  page: ''
+type_of: 'works'
 test_id: 7791910

@@ -1,5 +1,5 @@
 # script to scrape data from AO3
-import Work
+from gather.ao3structures import Work
 
 def scrape_page(id):
     fanWork = Work(id)
@@ -12,6 +12,6 @@ def scrape_page(id):
 
     return fanWork
 
-def scrap_blurb(soup_node):
+def scrape_blurb(soup_node):
     #return fanwork = Work() 
     pass
