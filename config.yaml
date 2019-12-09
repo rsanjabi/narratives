@@ -1,4 +1,5 @@
 ---
+delay: 1                                       # Wait time between AO3 requests in seconds
 files:
   output: 'data/work_id_list.txt'
 params:
@@ -16,6 +17,7 @@ params:
   work_search[query]: ''
   work_search[language_id]: ''
   tag_id: 'The Mandalorian (TV)'
-  page: ''
+  page: ''                                     # Don't alter
 type_of: 'works'
-test_id: 7791910
+#test_id: 7791910
+test_id: 21705841

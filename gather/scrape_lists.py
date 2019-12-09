@@ -8,11 +8,14 @@ import math
 import time
 import sys
 
-class ListOfWorks(object):
+class ListScraper(object):
     
     def __init__(self, config):
+        ''' Docstrings TODO '''
+        
         self.params = config['params']
         self.output_file = config['files']['output']
+        self.wait_time = config['delay']
         self.base_url = ''
         self.searchURL = Search(config['type_of'], self.params)
 
@@ -51,10 +54,10 @@ class ListOfWorks(object):
 
         bar = progressbar.ProgressBar(max_value=max_pages)
         bar.update(1)
-        pages = gen_urls(url_params, type_of, max_pages)
+        pages = self._gen_urls(max_pages)
 
         for i, page in enumerate(pages):
-            time.sleep(1)
+            time.sleep(self.wait_time)
             bar.update(i+1)
 
             with urllib.request.urlopen(page) as f:
@@ -68,11 +71,8 @@ class ListOfWorks(object):
         return
 
     
-    def _gen_urls(self, url_params, type_of, max_pages):
+    def _gen_urls(self, max_pages):
         ''' Generate each subpage '''
         for i in range(2, max_pages+1):
-            url_params['page'] = i
-            params = urllib.parse.urlencode(url_params)
-            url = "https://archiveofourown.org/" + type_of + "?%s" % params
-            yield url
+            yield self.searchURL.generateURL(page=i)
         return

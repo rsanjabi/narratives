@@ -1,13 +1,17 @@
 # Class defining work data structure
 import urllib
+from datetime import datetime
+import json
+import pytz
 
 class Work:
-    def __init__(self, id):
+    def __init__(self, id, url):
         ''' Constructor for this class. '''
         # Create some member animals
         self.id = id
+        self.url = url
         self.rating = ''
-        self.arch_warnings = []
+        self.archive_warnings = []
         self.categories = []
         self.fandoms = []
         self.relationships = []
@@ -18,18 +22,21 @@ class Work:
         self.updated = ''
         self.words = ''
         self.chapter_current_count = ''
-        self.chatper_max_count = ''
+        self.chapter_max_count = ''
         self.comments_count = ''
         self.comments = []
-        self.kudos_count = ''
+        self.kudos_total_count = ''
         self.kudo_guest_count = ''
-        self.kudos = []
+        self.kudos_users = []
         self.bookmarks_count = ''
         self.hits = ''
-        self.scrape_date = ''
+        self.scrape_date = str(datetime.now(tz=pytz.utc))
         self.meta_notes = {}    # a  dict {'all': Chapter, '1': Chapter, 'end': Chapter}
         self.author = ''
         self.body_non_text = '' # detects things like links or images
+
+    def print(self):
+        print(json.dumps(vars(self), sort_keys=True, indent=4))
 
 class Chapter:
     def __init__(self, title, summary, notes, body):
