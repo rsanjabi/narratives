@@ -13,6 +13,9 @@ class PageScraper():
     def __init__(self, id):
         self.url = "https://archiveofourown.org/works/" + str(id) + "?view_adult=true&amp;view_full_work=true"
         self.fanWork = Work(id, self.url)
+
+    def print(self):
+        self.fanWork.print()
         
     def scrape(self):
         ''' Scrapes the contents of the page '''
@@ -21,7 +24,7 @@ class PageScraper():
             with urllib.request.urlopen(self.url) as f:
                 soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
         except:
-            print("Error reading page")
+            print("Error reading works page. ", self.url)
             return
 
         self.fanWork.rating = self._get_rating(soup)
@@ -36,13 +39,31 @@ class PageScraper():
         self.fanWork.updated = self._get_updated(soup)
         self.fanWork.words = self._get_words(soup)
         self.fanWork.chapter_current_count, self.fanWork.chapter_max_count = self._get_chapter_count(soup)
-        self.fanWork.comments_count = self._get_comments_count(soup) # TODO ERROR
+        self.fanWork.comments_count = self._get_comments_count(soup) # TODO ERROR (OR MAYBE NOT?)
         self.fanWork.kudos_count = self._get_kudos_count(soup)  
         self.fanWork.bookmarks_count = self._get_bookmarks_count(soup)
         self.fanWork.hits = self._get_hits_count(soup)
-        self.fanWork.author = self._get_author(soup)
+        self.fanWork.author_pseud, self.fanWork.author_user = self._get_author(soup)
+        self.fanWork.title = self._get_title(soup)
 
-    
+        # Crawl to kudos page
+        kudos_url = "https://archiveofourown.org/works/" + str(self.fanWork.id) + "/kudos"
+        try:
+
+            with urllib.request.urlopen(kudos_url) as f:
+                kudo_soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
+                self.fanWork.kudo_guest_count, self.fanWork.kudos_users = self._get_kudos(kudo_soup)
+        except:
+            print("Error reading kudos page.", kudos_url)
+        
+        # Crawl comments
+        pass
+
+        # Crawl bookmarks
+        "https://archiveofourown.org/works/14388135/bookmarks"
+        pass
+
+
     def _get_rating(self, soup):
         # Get one rating back
         try:
@@ -176,12 +197,39 @@ class PageScraper():
         except:
             print("Error grabbing total hits count.")
 
+    def _get_title(self, soup):
+        # Get title 
+        try:
+            return soup.find(class_="title heading").get_text().strip()
+        except:
+            print("Error grabbing title.")
+
     def _get_author(self, soup):
-        pass
-        return False
+        # Get author 
+        psued = ''
+        primary = ''
+        try:
+            user_entire = soup.find(class_="byline heading").get_text().strip()
+            if ' ' in user_entire:
+                psued, primary = user_entire.split()
+                primary = primary.lstrip('(').rstrip(')')
+            return psued, primary
+        except:
+            print("Error grabbing author.")
+
+    def _get_kudos(self, soup):
+        # Get list of users who gave kudos and number of guests who kudo'd
+
+        try:
+            user_list_soup = soup.find(class_="kudos")
+            _, guest_text = user_list_soup.get_text().split('as well as')
+            guest_count = guest_text.replace('\n', '').strip().rstrip('guests left kudos on this work!')
+            kudo_names = [user.get_text() for user in user_list_soup.find_all('a')]
+            return guest_count, kudo_names
+        except:
+            print("Error grabbing title.")
+            return '', ''
 
 
-    def print(self):
-        self.fanWork.print()
 
 

@@ -32,8 +32,13 @@ class Work:
         self.hits = ''
         self.scrape_date = str(datetime.now(tz=pytz.utc))
         self.meta_notes = {}    # a  dict {'all': Chapter, '1': Chapter, 'end': Chapter}
-        self.author = ''
+        self.author_pseud = ''        # user/pseud
+        self.author_user = ''    # user/primary
+        self.title = ''
         self.body_non_text = '' # detects things like links or images
+        self.gift = ''          # User(s) work was gifted for
+        self.series = ''
+        self.collections = ''
 
     def print(self):
         print(json.dumps(vars(self), sort_keys=True, indent=4))
