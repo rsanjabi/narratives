@@ -14,20 +14,18 @@ category:
         relationships:
         characters
         fandoms
-
-works
-bookmarks
-comments
+    works
+    bookmarks
+    comments
 
 users:
     psueds
 
-
 1. Scrape
+    - error check for min & max and multiple
     - comments
+        - check for deleted comments
     - work/chapter details
-    - kudos
-    - error check for min & max
 2. Insert
     - setup databases
     - insert into graph db & rdbm 

@@ -1,5 +1,5 @@
 # script to scrape data from AO3
-from gather.ao3structures import Work
+from gather.ao3structures import Work, Comment
 from bs4 import BeautifulSoup
 import progressbar
 import urllib.request
@@ -9,7 +9,7 @@ import time
 import sys
 import json
 
-class PageScraper():
+class WorkScraper():
     def __init__(self, id):
         self.url = "https://archiveofourown.org/works/" + str(id) + "?view_adult=true&amp;view_full_work=true"
         self.fanWork = Work(id, self.url)
@@ -19,14 +19,14 @@ class PageScraper():
         
     def scrape(self):
         ''' Scrapes the contents of the page '''
-        
+        print("Debug start scraping")
         try:
             with urllib.request.urlopen(self.url) as f:
                 soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
         except:
             print("Error reading works page. ", self.url)
             return
-
+        print("Debug start parsing")
         self.fanWork.rating = self._get_rating(soup)
         self.fanWork.archive_warnings = self._get_warning(soup)
         self.fanWork.categories = self._get_categories(soup)
@@ -50,38 +50,33 @@ class PageScraper():
         self.fanWork.collection_ref, self.fanWork.collection_name = self._get_collections(soup) # fix so that it grabs multiple pairs
         self.fanWork.associations = self._get_associations(soup)
 
+        print("Debug start kudo crawl")
         # Crawl to kudos page
-        kudos_url = "https://archiveofourown.org/works/" + str(self.fanWork.id) + "/kudos"
-        try:
-
-            with urllib.request.urlopen(kudos_url) as f:
-                kudo_soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
-                #self.fanWork.kudo_guest_count, self.fanWork.kudos_users = self._get_kudos(kudo_soup)
-                #TODO remove for production
-        except:
-            print("Error reading kudos page.", kudos_url)
+        self.fanWork.kudo_guest_count, self.fanWork.kudos = self._crawl_kudos(soup)
         
+        print("Debug start comment scraping")
         # Crawl comments
-        self.fanWork.comments = self._get_comments(soup)
+        self.fanWork.comments = self._crawl_comments(soup)
 
         # Crawl bookmarks
         "https://archiveofourown.org/works/14388135/bookmarks"
         pass
 
-    def _get_comments(self, soup):
+    def _crawl_comments(self, soup):
+        # Crawl throught all the pages returning a list of comments
         comment_list = []
-        pages_soup = _crawl_comments_pages(soup)
+        pages_soup = self._crawl_comment_pages()
         for page in pages_soup:
-            comments_blurb = _crawl_comments_blurbs(page)
+            comments_blurb = self._get_comments_blurbs(page) 
             for comment in comments_blurb:
-                comment_list.append(_get_a_comment(comment)) 
+                comment_list.append(self._get_a_comment(comment)) 
         return comment_list
         
-    def _crawl_comment_pages(self, soup):
-        # Crawl pages to return a new page of soup
-
+    def _crawl_comment_pages(self):
+        # Crawl a each page of comments returning that pages soup
+        print("Debug grab first comment page")
         try:
-            comments_url = 'https://archiveofourown.org/comments/show_comments?page='+ str(1) + '&view_full_work=true&work_id=' + str(self.fanWork.id)
+            comments_url = 'https://archiveofourown.org/comments/show_comments?page=1&view_full_work=true&work_id=' + str(self.fanWork.id)
             with urllib.request.urlopen(comments_url) as f:
                 soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
                 pagination_blurb = soup.find(class_='pagination actions')
@@ -92,6 +87,7 @@ class PageScraper():
 
         for i in range(1, max_pages+1):
             try:
+                print("DEBUG Page#", i)
                 comments_url = 'https://archiveofourown.org/comments/show_comments?page='+ str(i) + '&view_full_work=true&work_id=' + str(self.fanWork.id)
                 with urllib.request.urlopen(comments_url) as f:
                     soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
@@ -100,17 +96,30 @@ class PageScraper():
                 print("Error reading comment page #", str(i), comments_url)
         return
 
-    def _crawl_comments_blurbs(self, soup):
+    def _get_comments_blurbs(self, soup):
         # Generator returning sub-soup/blurb of a comment
         comment_blurb = soup.find(class_='thread').find_all(role='article')
         for comment in comment_blurb:
-            user = comment.find(class_='heading byline').get_text().split()
             yield comment
         return
 
-    def _get_a_comment(self, soup):
-        # Extracts the details
-        pass
+    def _get_a_comment(self, comment_soup):
+        # Extracts the details of comment
+    
+
+        try:
+            byline = comment.find(class_='heading byline').get_text()
+            user = byline.split('on')[0].strip()
+            byline = byline.split()
+            date_time = " ".join(byline[-7:-1])
+            chapter_num = byline[3]
+            comment_text = 0
+            reply_to = 0
+            id = 0
+            edit_date = 0
+            return Comment(user, chapter_num, date_time, comment_text, reply_to, id, edit_date)
+        except:
+            return None
 
     def _get_rating(self, soup):
         # Get one rating back
@@ -315,9 +324,21 @@ class PageScraper():
         except:
             print("Error grabbing translated/associated works.")
 
-    def _get_kudos(self, soup):
+    def _crawl_kudos(self, soup):
         # Get list of users who gave kudos and number of guests who kudo'd
+        
+        kudos_url = "https://archiveofourown.org/works/" + str(self.fanWork.id) + "/kudos"
+        try:
 
+            with urllib.request.urlopen(kudos_url) as f:
+                kudo_soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
+                guest_count, users = self._get_kudos(kudo_soup)
+                return guest_count, users
+        except:
+            print("Error reading kudos page.", kudos_url)
+
+    def _get_kudos(self, soup):
+        # get a list of users who kudo'd
         try:
             user_list_soup = soup.find(class_="kudos")
             _, guest_text = user_list_soup.get_text().split('as well as')

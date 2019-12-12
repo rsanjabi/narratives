@@ -1,5 +1,5 @@
 from gather.scrape_lists import ListScraper 
-from gather.scrape_work import PageScraper
+from gather.scrape_work import WorkScraper
 import yaml
 
 try:
@@ -11,6 +11,6 @@ except Exception as e:
 #works = ListScraper(config)
 #works.scrape()
 
-page = PageScraper(config['test_id'])
-page.scrape()
-page.print()
+work = WorkScraper(config['test_id'])
+work.scrape()
+work.print()
