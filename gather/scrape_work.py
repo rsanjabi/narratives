@@ -45,6 +45,10 @@ class PageScraper():
         self.fanWork.hits = self._get_hits_count(soup)
         self.fanWork.author_pseud, self.fanWork.author_user = self._get_author(soup)
         self.fanWork.title = self._get_title(soup)
+        self.fanWork.gift = self._get_gift(soup)
+        self.fanWork.series = self._get_series(soup)
+        self.fanWork.collection_ref, self.fanWork.collection_name = self._get_collections(soup) # fix so that it grabs multiple pairs
+        self.fanWork.associations = self._get_associations(soup)
 
         # Crawl to kudos page
         kudos_url = "https://archiveofourown.org/works/" + str(self.fanWork.id) + "/kudos"
@@ -52,16 +56,37 @@ class PageScraper():
 
             with urllib.request.urlopen(kudos_url) as f:
                 kudo_soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
-                self.fanWork.kudo_guest_count, self.fanWork.kudos_users = self._get_kudos(kudo_soup)
+                #self.fanWork.kudo_guest_count, self.fanWork.kudos_users = self._get_kudos(kudo_soup)
+                #TODO remove for production
         except:
             print("Error reading kudos page.", kudos_url)
         
         # Crawl comments
-        pass
+        self.fanWork.comments = self._crawl_comments(soup)
 
         # Crawl bookmarks
         "https://archiveofourown.org/works/14388135/bookmarks"
         pass
+
+    def _crawl_comments(self, soup):
+        # Crawl pages to get comments
+        # figure out how many pages
+
+        comment_list = []
+
+        pagination_blurb = soup.find(class_='pagination actions')
+        page_counts = [page.get_text() for page in pagination_blurb.find_all('li')]
+        max_pages = int(page_counts[-2:-1][0])
+        print(max_pages)
+        try:
+            comments_url = 'https://archiveofourown.org/comments/show_comments?page='+ str(1) + '&view_full_work=true&work_id=' + str(self.fanWork.id)
+            with urllib.request.urlopen(comments_url) as f:
+                comments_soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
+                #comment_list.append(_get_comments(comments_soup,page))
+                return self._get_comments(comments_soup)
+        except:
+            print("Error reading comments.", comments_url)
+        return comment_list
 
 
     def _get_rating(self, soup):
@@ -213,9 +238,59 @@ class PageScraper():
             if ' ' in user_entire:
                 psued, primary = user_entire.split()
                 primary = primary.lstrip('(').rstrip(')')
+            else:
+                primary = user_entire
+                psued = user_entire
             return psued, primary
         except:
             print("Error grabbing author.")
+
+    def _get_gift(self, soup):
+        # Get gift recipient 
+        try:
+            association_blurb = soup.find(class_="associations")
+            recipient = association_blurb.find_all('li')[0].find('a').get_text()
+            return  recipient
+        except:
+            print("Error grabbing gift recipient.")
+
+    def _get_series(self, soup):
+        # Get series info 
+        series_dict = {}
+
+        try:
+            series_blurb = soup.find(class_='position')
+            part, name = series_blurb.get_text().lstrip('Part ').split(' of the ')
+            name = name.rstrip(' series')
+            series_dict['position'] = part
+            series_dict['series_name'] = name
+            series_dict['series_id'] = series_blurb.find('a').get('href').strip('/series/')
+            return series_dict
+        except:
+            print("Error grabbing series info.")
+
+    def _get_collections(self, soup):
+        # Get collection info 
+
+        # TODO get all collections return as list
+        try:
+            collection_blurb = soup.find_all(class_="collections")[1]
+            collection_ref = collection_blurb.find('a').get('href').lstrip('/collections/')
+            collection_name = collection_blurb.get_text().strip()
+            return collection_ref, collection_name
+        except:
+            print("Error grabbing title.")
+
+    def _get_associations(self, soup):
+        # Get translations/associations 
+        # TODO reciprical scraping
+
+        try:
+            associations_blurb = soup.find(class_='associations').find_all('li')[1]
+            associated_id = associations_blurb.find('a').get('href').lstrip('/works/')
+            return associated_id
+        except:
+            print("Error grabbing translated/associated works.")
 
     def _get_kudos(self, soup):
         # Get list of users who gave kudos and number of guests who kudo'd
@@ -230,6 +305,13 @@ class PageScraper():
             print("Error grabbing title.")
             return '', ''
 
-
+    def _get_comments(self, soup):
+        # Grab all the comments as a list
+        comment_list = []
+        comment_blurb = soup.find(class_='thread').find_all(role='article')
+        for comment in comment_blurb:
+            user = comment.find(class_='heading byline').get_text().split()
+            comment_list.append(user)
+        return comment_list
 
 

@@ -10,6 +10,8 @@ class Work:
         # Create some member animals
         self.id = id
         self.url = url
+        self.scrape_date = str(datetime.now(tz=pytz.utc))
+
         self.rating = ''
         self.archive_warnings = []
         self.categories = []
@@ -23,22 +25,27 @@ class Work:
         self.words = ''
         self.chapter_current_count = ''
         self.chapter_max_count = ''
-        self.comments_count = ''
-        self.comments = []
+        self.hits = ''
         self.kudos_total_count = ''
         self.kudo_guest_count = ''
         self.kudos_users = []
-        self.bookmarks_count = ''
-        self.hits = ''
-        self.scrape_date = str(datetime.now(tz=pytz.utc))
-        self.meta_notes = {}    # a  dict {'all': Chapter, '1': Chapter, 'end': Chapter}
         self.author_pseud = ''        # user/pseud
         self.author_user = ''    # user/primary
         self.title = ''
-        self.body_non_text = '' # detects things like links or images
+        self.bookmarks_count = ''
+
         self.gift = ''          # User(s) work was gifted for
-        self.series = ''
-        self.collections = ''
+        self.series = {}            # series id, name, position
+        self.collection_name = ''
+        self.collection_ref = ''
+        self.associations = []   # a list of associations (translations or original_source)
+        self.meta_notes = {}    # a  dict {'all': Chapter, '1': Chapter, 'end': Chapter}
+        self.body_non_text = '' # detects things like links or images
+
+        self.comments_count = ''
+        self.comments = []
+        self.bookmarks = []
+
 
     def print(self):
         print(json.dumps(vars(self), sort_keys=True, indent=4))
@@ -51,12 +58,14 @@ class Chapter:
         self.body = body
 
 class Comment:
-    def __init__(self, user, chapter_num, date_time, comment_text, reply_to):
+    def __init__(self, user, chapter_num, date_time, comment_text, reply_to, id, edit_date):
         self.user = user 
         self.chapter_num = chapter_num
         self.date_time = date_time
         self.comment_text = comment_text
         self.reply_to = reply_to
+        self.id = id
+        self.edit_date = edit_date
 
 class Bookmark:
     def __init__(self, user, date, tags, comments):
@@ -78,3 +87,11 @@ class Search:
         url = "https://archiveofourown.org/" + self.type_of + "?%s" % params
 
         return url
+
+class Translation:
+    ''' object for either source object or in case of translation works points to original'''
+
+    def __init__(self, translator, translated_id, language):
+        self.language = language
+        self.translator = translator
+        self.translated_id = translated_id
