@@ -62,32 +62,55 @@ class PageScraper():
             print("Error reading kudos page.", kudos_url)
         
         # Crawl comments
-        self.fanWork.comments = self._crawl_comments(soup)
+        self.fanWork.comments = self._get_comments(soup)
 
         # Crawl bookmarks
         "https://archiveofourown.org/works/14388135/bookmarks"
         pass
 
-    def _crawl_comments(self, soup):
-        # Crawl pages to get comments
-        # figure out how many pages
-
+    def _get_comments(self, soup):
         comment_list = []
+        pages_soup = _crawl_comments_pages(soup)
+        for page in pages_soup:
+            comments_blurb = _crawl_comments_blurbs(page)
+            for comment in comments_blurb:
+                comment_list.append(_get_a_comment(comment)) 
+        return comment_list
+        
+    def _crawl_comment_pages(self, soup):
+        # Crawl pages to return a new page of soup
 
-        pagination_blurb = soup.find(class_='pagination actions')
-        page_counts = [page.get_text() for page in pagination_blurb.find_all('li')]
-        max_pages = int(page_counts[-2:-1][0])
-        print(max_pages)
         try:
             comments_url = 'https://archiveofourown.org/comments/show_comments?page='+ str(1) + '&view_full_work=true&work_id=' + str(self.fanWork.id)
             with urllib.request.urlopen(comments_url) as f:
-                comments_soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
-                #comment_list.append(_get_comments(comments_soup,page))
-                return self._get_comments(comments_soup)
+                soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
+                pagination_blurb = soup.find(class_='pagination actions')
+                page_counts = [page.get_text() for page in pagination_blurb.find_all('li')]
+                max_pages = int(page_counts[-2:-1][0])
         except:
             print("Error reading comments.", comments_url)
-        return comment_list
 
+        for i in range(1, max_pages+1):
+            try:
+                comments_url = 'https://archiveofourown.org/comments/show_comments?page='+ str(i) + '&view_full_work=true&work_id=' + str(self.fanWork.id)
+                with urllib.request.urlopen(comments_url) as f:
+                    soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
+                yield soup
+            except:
+                print("Error reading comment page #", str(i), comments_url)
+        return
+
+    def _crawl_comments_blurbs(self, soup):
+        # Generator returning sub-soup/blurb of a comment
+        comment_blurb = soup.find(class_='thread').find_all(role='article')
+        for comment in comment_blurb:
+            user = comment.find(class_='heading byline').get_text().split()
+            yield comment
+        return
+
+    def _get_a_comment(self, soup):
+        # Extracts the details
+        pass
 
     def _get_rating(self, soup):
         # Get one rating back
@@ -305,13 +328,4 @@ class PageScraper():
             print("Error grabbing title.")
             return '', ''
 
-    def _get_comments(self, soup):
-        # Grab all the comments as a list
-        comment_list = []
-        comment_blurb = soup.find(class_='thread').find_all(role='article')
-        for comment in comment_blurb:
-            user = comment.find(class_='heading byline').get_text().split()
-            comment_list.append(user)
-        return comment_list
-
-
+   
