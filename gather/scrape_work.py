@@ -59,7 +59,7 @@ class WorkScraper():
         self.fanWork.comments = self._crawl_comments(soup)
 
         # Crawl bookmarks
-        "https://archiveofourown.org/works/14388135/bookmarks"
+        #"https://archiveofourown.org/works/14388135/bookmarks"
         pass
 
     def _crawl_comments(self, soup):
@@ -122,14 +122,14 @@ class WorkScraper():
             return None
 
     def _get_rating(self, soup):
-        # Get one rating back
+        # Get exactly one of 5 possible ratings back ('Not Rated', 'General Audiences', 'Teen and Up Audiences', 'Mature', 'Explicit')
         try:
             return soup.find_all(class_="rating tags")[1].get_text().strip()
         except:
             print("Error grabbing rating.")
 
     def _get_warning(self, soup):
-        # Get a list of warnings
+        # Get 0 to 6 warnings
         try:
             warnings = soup.find_all(class_="warning tags")[1].find_all('li')
             warning_list = [warning.get_text().strip() for warning in warnings]
@@ -139,7 +139,7 @@ class WorkScraper():
             return
 
     def _get_categories(self, soup):
-        # Get a list of (relationship) categories
+        # Get 0 to 6 (relationship) categories in a list (gen, f/f, f/m, m/m, other, )
         try:
             categories = soup.find_all(class_="category tags")[1].find_all('li')
             category_list = [category.get_text().strip() for category in categories]
@@ -149,7 +149,7 @@ class WorkScraper():
             return
 
     def _get_fandoms(self, soup):
-        # Get a list of fandoms
+        # Get 1 to many fandoms in a list
         try:
             fandoms = soup.find_all(class_="fandom tags")[1].find_all('li')
             fandom_list = [fandom.get_text().strip() for fandom in fandoms]
@@ -159,7 +159,7 @@ class WorkScraper():
             return
 
     def _get_relationships(self, soup):
-        # Get a list of relationships
+        # Get 0 to many relationships
         try:
             ships = soup.find_all(class_="relationship tags")[1].find_all('li')
             ship_list = [ship.get_text().strip() for ship in ships]
@@ -169,7 +169,7 @@ class WorkScraper():
             return
 
     def _get_characters(self, soup):
-        # Get a list of characters
+        # Get 0 to many characters
         try:
             characters = soup.find_all(class_="character tags")[1].find_all('li')
             char_list = [char.get_text().strip() for char in characters]
@@ -179,7 +179,7 @@ class WorkScraper():
             return
 
     def _get_additional_tags(self, soup):
-        # Get a list of additional tags
+        # Get 0 to many freeform/additional tags
         try:
             add_tags = soup.find_all(class_="freeform tags")[1].find_all('li')
             add_tag_list = [tag.get_text().strip() for tag in add_tags]
@@ -189,7 +189,7 @@ class WorkScraper():
             return
 
     def _get_language(self, soup):
-        # Get language
+        # Get one language
         try:
             return soup.find_all(class_="language")[1].get_text().strip()
         except:
