@@ -18,7 +18,7 @@ class Work:
         self.characters = []            # 0 to M
         self.additional_tags = []       # 0 to M
         self.language = ''              # 1 language
-        self.published = ''             # 1 published date string format
+        self.published = ''             # 1 published date string format (not ness date added to archive)
         self.updated = ''               # 0 to 1 updated date
         self.words = ''                 # Number of words in string format '0' to really big
         self.chapter_current_count = '' # 1 to Big number
@@ -30,7 +30,7 @@ class Work:
         self.creator_pseud = ''         # user/pseud - can't have some characters
         self.creator_user = ''          # user/primary - can't have some characters
         self.title = ''                 # String including special characters from 1(?) to M long
-        self.bookmarks_count = ''       # 1 to M (10018 is largest)
+        self.bookmarks_count = ''       # n/a, 1 to M (10018 is largest)
         self.gift = ''                  # n/a, 1 to M user(s) work was gifted for. May or may not be users
         self.series = {}                # n/a, series id, name, position
         self.collection_name = ''       # n/a, 1 to many collections
