@@ -11,6 +11,6 @@ except Exception as e:
 #works = ListScraper(config)
 #works.scrape()
 
-work = WorkScraper(config['test_id'])
+work = WorkScraper(str(config['test_id']))
 work.scrape()
 work.print()

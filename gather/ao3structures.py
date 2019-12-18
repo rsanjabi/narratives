@@ -7,44 +7,41 @@ import pytz
 class Work:
     def __init__(self, id, url):
         ''' Constructor for this class. '''
-        # Create some member animals
-        self.id = id
-        self.url = url
-        self.scrape_date = str(datetime.now(tz=pytz.utc))
+        self.id = id                    # Number in string format from '2' to approximately '21841285'
+        self.url = url                  # Url of work; view_adult = true; view_full_work = true
+        self.scrape_date = str(datetime.now(tz=pytz.utc))   # today's date and time in utc
+        self.rating = ''                # 1 of 5 possible ratings
+        self.archive_warnings = []      # 0 to 6 warnings
+        self.categories = []            # 0 to 6 relationship categories
+        self.fandoms = []               # 1 to M
+        self.relationships = []         # 0 to M
+        self.characters = []            # 0 to M
+        self.additional_tags = []       # 0 to M
+        self.language = ''              # 1 language
+        self.published = ''             # 1 published date string format
+        self.updated = ''               # 0 to 1 updated date
+        self.words = ''                 # Number of words in string format '0' to really big
+        self.chapter_current_count = '' # 1 to Big number
+        self.chapter_max_count = ''     # ? or 1 to big number
+        self.hits = ''                  # n/a, 0 or 1 to big number
+        self.kudos_total_count = ''     # n/a, 0 to big number
+        self.kudo_guest_count = ''      # n/a, 1 to big number
+        self.kudos_users = []           # list of users
+        self.creator_pseud = ''         # user/pseud - can't have some characters
+        self.creator_user = ''          # user/primary - can't have some characters
+        self.title = ''                 # String including special characters from 1(?) to M long
+        self.bookmarks_count = ''       # 1 to M (10018 is largest)
+        self.gift = ''                  # n/a, 1 to M user(s) work was gifted for. May or may not be users
+        self.series = {}                # n/a, series id, name, position
+        self.collection_name = ''       # n/a, 1 to many collections
+        self.collection_ref = ''        
+        self.associations = []          # a list of associations (translations or original_source)
+        self.meta_notes = {}            # a  dict {'all': Chapter, '1': Chapter, 'end': Chapter}
+        self.body_non_text = ''         # detects things like links or images
 
-        self.rating = ''
-        self.archive_warnings = []
-        self.categories = []
-        self.fandoms = []
-        self.relationships = []
-        self.characters = []
-        self.additional_tags = []
-        self.language = ''
-        self.published = ''
-        self.updated = ''
-        self.words = ''
-        self.chapter_current_count = ''
-        self.chapter_max_count = ''
-        self.hits = ''
-        self.kudos_total_count = ''
-        self.kudo_guest_count = ''
-        self.kudos_users = []
-        self.author_pseud = ''        # user/pseud
-        self.author_user = ''    # user/primary
-        self.title = ''
-        self.bookmarks_count = ''
-
-        self.gift = ''          # User(s) work was gifted for
-        self.series = {}            # series id, name, position
-        self.collection_name = ''
-        self.collection_ref = ''
-        self.associations = []   # a list of associations (translations or original_source)
-        self.meta_notes = {}    # a  dict {'all': Chapter, '1': Chapter, 'end': Chapter}
-        self.body_non_text = '' # detects things like links or images
-
-        self.comments_count = ''
-        self.comments = []
-        self.bookmarks = []
+        self.comments_count = ''        # n/a, 1 to M
+        self.comments = []              # a list of comment objects
+        self.bookmarks = []             # a list of bookmark objects
 
 
     def print(self):

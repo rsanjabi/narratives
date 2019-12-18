@@ -11,8 +11,11 @@ import json
 
 class WorkScraper():
     def __init__(self, id):
-        self.url = "https://archiveofourown.org/works/" + str(id) + "?view_adult=true&amp;view_full_work=true"
-        self.fanWork = Work(id, self.url)
+        self.url = "https://archiveofourown.org/works/" + id + "?view_adult=true&amp;view_full_work=true"
+        if id.isnumeric():
+            self.fanWork = Work(id, self.url)
+        else:
+            raise Exception("Work ID Not a Number")
 
     def print(self):
         self.fanWork.print()
@@ -43,7 +46,7 @@ class WorkScraper():
         self.fanWork.kudos_count = self._get_kudos_count(soup)  
         self.fanWork.bookmarks_count = self._get_bookmarks_count(soup)
         self.fanWork.hits = self._get_hits_count(soup)
-        self.fanWork.author_pseud, self.fanWork.author_user = self._get_author(soup)
+        self.fanWork.creator_pseud, self.fanWork.creator_user = self._get_creator(soup)
         self.fanWork.title = self._get_title(soup)
         self.fanWork.gift = self._get_gift(soup)
         self.fanWork.series = self._get_series(soup)
@@ -76,7 +79,7 @@ class WorkScraper():
         # Crawl a each page of comments returning that pages soup
         print("Debug grab first comment page")
         try:
-            comments_url = 'https://archiveofourown.org/comments/show_comments?page=1&view_full_work=true&work_id=' + str(self.fanWork.id)
+            comments_url = 'https://archiveofourown.org/comments/show_comments?page=1&view_full_work=true&work_id=' + self.fanWork.id
             with urllib.request.urlopen(comments_url) as f:
                 soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
                 pagination_blurb = soup.find(class_='pagination actions')
@@ -88,7 +91,7 @@ class WorkScraper():
         for i in range(1, max_pages+1):
             try:
                 print("DEBUG Page#", i)
-                comments_url = 'https://archiveofourown.org/comments/show_comments?page='+ str(i) + '&view_full_work=true&work_id=' + str(self.fanWork.id)
+                comments_url = 'https://archiveofourown.org/comments/show_comments?page='+ str(i) + '&view_full_work=true&work_id=' + self.fanWork.id
                 with urllib.request.urlopen(comments_url) as f:
                     soup = BeautifulSoup(f.read().decode('utf-8'), features="lxml")
                 yield soup
@@ -115,7 +118,7 @@ class WorkScraper():
             chapter_num = byline[3]
             comment_text = 0
             reply_to = 0
-            id = 0
+            id = '0'
             edit_date = 0
             return Comment(user, chapter_num, date_time, comment_text, reply_to, id, edit_date)
         except:
@@ -130,6 +133,7 @@ class WorkScraper():
 
     def _get_warning(self, soup):
         # Get 0 to 6 warnings
+        warning_list = []
         try:
             warnings = soup.find_all(class_="warning tags")[1].find_all('li')
             warning_list = [warning.get_text().strip() for warning in warnings]
@@ -261,8 +265,8 @@ class WorkScraper():
         except:
             print("Error grabbing title.")
 
-    def _get_author(self, soup):
-        # Get author 
+    def _get_creator(self, soup):
+        # Get 1 to many creators 
         psued = ''
         primary = ''
         try:
@@ -327,7 +331,7 @@ class WorkScraper():
     def _crawl_kudos(self, soup):
         # Get list of users who gave kudos and number of guests who kudo'd
         
-        kudos_url = "https://archiveofourown.org/works/" + str(self.fanWork.id) + "/kudos"
+        kudos_url = "https://archiveofourown.org/works/" + self.fanWork.id + "/kudos"
         try:
 
             with urllib.request.urlopen(kudos_url) as f:
