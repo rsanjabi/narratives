@@ -45,3 +45,9 @@ users:
     - cron jobs
     - monitoring
     - serverless
+
+Random Todo:
+
+specify http header with get requests
+	headers = {'user-agent' : header_info}
+	req = requests.get(url, headers=headers)

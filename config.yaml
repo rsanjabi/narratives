@@ -2,7 +2,7 @@
 delay: 1                                       # Wait time between AO3 requests in seconds
 files:
   output: 'data/work_id_list.txt'
-params:
+params_get_list:
   utf8: '✓'                                    # Don't alter
   commit: 'Sort and Filter'                    # Don't alter 
   work_search[sort_column]: 'created_at'       # or 'date_posted'
@@ -21,3 +21,4 @@ params:
 type_of: 'works'
 #test_id: 11030034
 test_id: 8543680
+header_info: ''

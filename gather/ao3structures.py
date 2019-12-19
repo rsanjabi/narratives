@@ -27,8 +27,8 @@ class Work:
         self.kudos_total_count = ''     # n/a, 0 to big number
         self.kudo_guest_count = ''      # n/a, 1 to big number
         self.kudos_users = []           # list of users
-        self.creator_pseud = ''         # user/pseud - can't have some characters
-        self.creator_user = ''          # user/primary - can't have some characters
+        self.creator_pseud = ''         # usually 0, sometimes 1 user/pseud - can't have some characters
+        self.creator_user = ''          # 1 (in rare cases 0) user/primary - can't have some characters
         self.title = ''                 # String including special characters from 1(?) to M long
         self.bookmarks_count = ''       # n/a, 1 to M (10018 is largest)
         self.gift = ''                  # n/a, 1 to M user(s) work was gifted for. May or may not be users
