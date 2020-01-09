@@ -4,3 +4,4 @@ dump/
 __pycache__/
 .ipynb_checkpoints/
 delete.json
+data/
