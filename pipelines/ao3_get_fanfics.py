@@ -211,6 +211,7 @@ def scrape(fic_ids, csv_out, headers, restart, is_csv, only_first_chap):
 
 def main():
 	fic_ids, csv_out, headers, restart, is_csv, only_first_chap = get_args()
+	scrape(fic_ids, csv_out, headers, restart, is_csv, only_first_chap)
 
 if __name__== "__main__":
 	main()
