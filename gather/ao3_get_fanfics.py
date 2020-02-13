@@ -170,6 +170,7 @@ def process_id(fic_id, restart, found):
 		return True
 	else:
 		return False
+		
 def scrape(fic_ids, csv_out, headers, restart, is_csv, only_first_chap):
 	delay = 5
 	os.chdir(os.getcwd())
