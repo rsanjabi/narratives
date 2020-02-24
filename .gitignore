@@ -1,9 +1,6 @@
 # Local development noodlings
 dump/
+data/
 .vscode
 __pycache__/
-.ipynb_checkpoints/
-delete.json
-data/
 .DS_Store
-data.csv
