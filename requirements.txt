@@ -1,3 +1,2 @@
-progressbar2
-beautifulsoup4
-pyyaml
+implicit
+flask
