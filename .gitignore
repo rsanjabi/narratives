@@ -4,3 +4,5 @@ data/
 .vscode
 __pycache__/
 .DS_Store
+env/
+notebooks/.ipynb_checkpoints/
