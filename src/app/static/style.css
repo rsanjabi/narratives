@@ -8,24 +8,34 @@ body {
 	font-family: 'Helvetica';
 	background: #000;
 	color: #fff;
-	font-size: 24px;
+	font-size: 20px;
 	text-align:center;
 	letter-spacing:1.4px;
 
 }
-.login { 
+#login { 
 	position: absolute;
-	top: 40%;
-	left: 50%;
-	margin: -150px 0 0 -150px;
-	width:400px;
-	height:400px;
+	top: 10%;
+	left: 30%;
+	margin: -10px 0 0 -10px;
+	width:700px;
+	height:700px;
+}
+
+.results { 
+	position: absolute;
+	top: 30%;
+	left: 30%;
+	margin: -10px 0 0 -10px;
+	width:500px;
+	height:500px;
+	font-size: 24px;
 }
 
 .login h1 { color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.3); letter-spacing:1px; text-align:center; }
 
 input { 
-	width: 100%; 
+	width: 50%; 
 	margin-bottom: 10px; 
 	background: rgba(0,0,0,0.3);
 	border: none;
