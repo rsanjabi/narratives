@@ -4,24 +4,32 @@
   <meta charset="UTF-8">
   <title>Deployment Tutorial 1</title>
   <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css">
+  
   
 </head>
-
-<body style="background: rgb(29, 29, 65);">
+<body>
  <div class="login">
-	<h1>Sales Forecasting</h1>
+	<h1>Fanworks You May Also Like</h1>
 
      <!-- Main Input For Receiving Query to our ML -->
     <form action="{{ url_for('predict')}}"method="post">
-    	<input type="text" name="rate" placeholder="rate" required="required" />
-        <input type="text" name="sales in first month" placeholder="sales in first month" required="required" />
-		<input type="text" name="sales in second month" placeholder="sales in second month" required="required" />
-        <button type="submit" class="btn btn-primary btn-block btn-large">Predict sales in third month</button>
+    	<input type="text" name="work_id" placeholder="Enter the ID found in the URL of your favorite AO3 fanwork" required="required" />
+        <button type="submit" class="btn btn-primary btn-block btn-large">Gimme some works</button>
     </form>
+
+    {% if predict %}
+  
+    <h3><b>I'm <span style="color: green;">{{ accuracy }} %</span> sure this is
+        <span style="color: red;">{{ label }}.</span></b>
+    </h3>
+        <a href="/">Make another prediction</a>
+
+    </div>
+    {% endif %}
 
    <br>
    <br>
