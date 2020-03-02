@@ -53,7 +53,7 @@ def load__model():
 
 @app.route('/')
 def home():
-    return render_template('src/app/templates/index.html')
+    return render_template('index.html')
 
 @app.route('/predict',methods=['POST'])
 def predict():
@@ -62,7 +62,7 @@ def predict():
             fanwork_id = validate(request)
         except Exception as e:
             errormsg = f"{str(e)}"
-            return render_template('src/app/templates/index.html', prediction_text=errormsg) 
+            return render_template('index.html', prediction_text=errormsg) 
 
         suggestions = get_meta(fanwork_id)
         response = f"Suggested works for <a href='http://ao3.org/works/{fanwork_id}'>{next(suggestions)[1]}</a>:<br><br>"
@@ -80,12 +80,12 @@ def predict():
             link = f"<a href ='http://ao3.org/works/{suggested_id}'>{count}-{title}-{rating}</a><br>"
             response = response + link
             count += 1
-        return render_template('src/app/templates/index.html', prediction_text = Markup(response))
+        return render_template('index.html', prediction_text = Markup(response))
 
 @app.route('/<work_id>', methods=['POST'])
 def predict_again(work_id):
     #make generator pickup where it left off at
-    return return_template('src/app/templates/index.html', work_id=work_id)
+    return return_template('index.html', work_id=work_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
