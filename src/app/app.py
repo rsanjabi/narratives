@@ -82,10 +82,10 @@ def predict():
             count += 1
         return render_template('index.html', prediction_text = Markup(response))
 
-@app.route('/predict2', methods=['POST'])
-def predict_again():
+@app.route('/<work_id>', methods=['POST'])
+def predict_again(work_id):
     #make generator pickup where it left off at
-    pass
+    return return_template('index.html', work_id=work_id)
 
 if __name__ == "__main__":
     app.run(debug=True)
