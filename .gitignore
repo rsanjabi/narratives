@@ -1,9 +1,11 @@
 # Local development noodlings
 dump/
 data/
+docs/
 .vscode
 __pycache__/
 .DS_Store
 env/
 notebooks/.ipynb_checkpoints/
+notebooks/Messing Around.ipynb
 Procfile
