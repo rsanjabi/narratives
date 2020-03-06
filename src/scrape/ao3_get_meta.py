@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import argparse
-import time
+import time, datetime
 import os
 import csv
 import sys
@@ -43,12 +43,57 @@ def get_tags(meta):
     returns a list of lists, of
     rating, category, fandom, pairing, characters, additional_tags
     '''
-    tags = ['warnings', 'relationships', 'characters', 'freeforms']
+    tags = ['relationships', 'characters', 'freeforms']
     return list(map(lambda tag: get_tag_info(tag, meta), tags))
 
 def get_required_tags(work):
     req_tags = work.find(class_='required-tags').find_all('a')
     return [x.text for x in req_tags]
+
+def get_header(work):
+    '''
+    returns work_id, title, author, gifted to user
+    '''
+    
+    result = work.find('h4', class_='heading').find_all('a')
+    work_id = result[0].get('href').strip('/works/')
+    title = result[0].text
+    author = result[1].text
+    if len(result) == 3:
+        gifted = result[2].text
+    else:
+        gifted = ""
+    return [work_id, title, author, gifted]
+
+def get_fandoms(work):
+    try:
+        tag_list = work.find('h5', class_='fandoms heading').find_all('a')
+    except AttributeError as e:
+        return []
+    return [unidecode(result.text) for result in tag_list] 
+
+def get_summary(work):
+    try:
+        summary = work.find('blockquote', class_='userstuff summary').text.strip()
+    except AttributeError as e:
+        summary = ""
+    return [summary]
+
+def get_updated(work):
+    try:
+        date = work.find('p', class_='datetime').text
+    except AttributeError as e:
+        date = ""
+    return [date]
+
+def get_series(work):
+    try:
+        series = work.find('ul', class_='series')
+        part = series.find('strong').text
+        s_name = series.find('a').text
+    except AttributeError as e:
+        part, s_name = "", ""
+    return [part, s_name]
 
 def write_fic_to_csv(fandom, writer, errorwriter, header_info=''):
     '''
@@ -58,6 +103,7 @@ def write_fic_to_csv(fandom, writer, errorwriter, header_info=''):
     and the fic content itself.
     header_info should be the header info to encourage ethical scraping.
     '''
+    scrape_date = datetime.datetime.now().strftime("%b%d%Y")
     url = 'https://archiveofourown.org/tags/'+quote(fandom)+'/works'
     print('Scraping:', url)
     headers = {'user-agent' : header_info}
@@ -75,16 +121,18 @@ def write_fic_to_csv(fandom, writer, errorwriter, header_info=''):
         tags = get_tags(work)
         req_tags = get_required_tags(work)
         stats = get_stats(work)
-
-        #title = unidecode(soup.find("h2", class_="title heading").string).strip()
-        #row = [title] + list(map(lambda x: ', '.join(x), tags)) + req_tags #+ stats
-        row = list(map(lambda x: ', '.join(x), tags)) + req_tags + stats
+        header_tags = get_header(work)
+        fandoms = get_fandoms(work)
+        summary = get_summary(work)
+        updated = get_updated(work)
+        series = get_series(work)
+        row = header_tags + req_tags + fandoms + list(map(lambda x: ', '.join(x), tags)) + summary + stats + series + updated + [scrape_date]
         try:
             writer.writerow(row)
         except:
             print('Unexpected error: ', sys.exc_info()[0])
-            error_row = [fic_id] +  [sys.exc_info()[0]]
-            errorwriter.writerow(error_row)
+            #error_row = [fic_id] +  [sys.exc_info()[0]]
+            #errorwriter.writerow(error_row)
 
     print('Done.')
 
@@ -133,8 +181,7 @@ def scrape(fandom, csv_out, headers, restart, is_csv):
             #does the csv already exist? if not, let's write a header row.
             if os.stat(csv_out).st_size == 0:
                 print('Writing a header row for the csv.')
-                header = ['work_id', 'title', 'rating', 'category', 'fandom', 'relationship', 'character', 'additional tags', 'language', 'published', 'status', 'status date', 'words', 'chapters', 'comments', 'kudos', 'bookmarks', 'hits', 'body']
-                #header = ['work_id', 'title', 'author', 'rating', 'category', 'fandom', 'relationship', 'character', 'additional tags', 'language', 'status', 'status date', 'words', 'chapters', 'comments', 'kudos', 'bookmarks', 'hits', 'body', 'archive_warnings', 'summary', 'series_part', 'series_name', 'collections', 'scrape_date']
+                header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings', 'category', 'status', 'fandom', 'relationship', 'character', 'additional tags', 'summary','language', 'words', 'chapters', 'collections', 'comments', 'kudos', 'bookmarks', 'hits', 'series_part', 'series_name', 'updated', 'scrape_date']
                 writer.writerow(header)
             if is_csv:
                 with open("errors_" + csv_out, 'r+') as f_in:
