@@ -66,11 +66,16 @@ def get_header(work):
     return [work_id, title, author, gifted]
 
 def get_fandoms(work):
+    fandoms = ''
     try:
         tag_list = work.find('h5', class_='fandoms heading').find_all('a')
+        fan_list = [x.text for x in tag_list]
+        fandoms = ", ".join(fan_list)
+
     except AttributeError as e:
         return []
-    return [unidecode(result.text) for result in tag_list] 
+    
+    return [fandoms]
 
 def get_summary(work):
     try:
@@ -95,47 +100,64 @@ def get_series(work):
         part, s_name = "", ""
     return [part, s_name]
 
+def scrape_work(work, scrape_date):
+    tags = get_tags(work)
+    req_tags = get_required_tags(work)
+    stats = get_stats(work)
+    header_tags = get_header(work)
+    fandoms = get_fandoms(work)
+    summary = get_summary(work)
+    updated = get_updated(work)
+    series = get_series(work)
+    row = header_tags + req_tags + fandoms + \
+        list(map(lambda x: ', '.join(x), tags)) + summary + stats + series + updated + [scrape_date]
+    return row
+
+def get_soup(base_url, i, headers):
+    cur_url = base_url+str(i)
+    print(f"Scraping page: {cur_url}")
+    req = requests.get(cur_url, headers=headers)
+    if req.status_code == 200:
+        src = req.text
+        soup = BeautifulSoup(src, 'html.parser')
+        return True, soup
+    else:
+        return False, None
+
 def write_fic_to_csv(fandom, writer, errorwriter, header_info=''):
-    '''
-    fic_id is the AO3 ID of a fic, found every URL /works/[id].
-    writer is a csv writer object
-    the output of this program is a row in the CSV file containing all metadata 
-    and the fic content itself.
-    header_info should be the header info to encourage ethical scraping.
-    '''
-    scrape_date = datetime.datetime.now().strftime("%b%d%Y")
-    url = 'https://archiveofourown.org/tags/'+quote(fandom)+'/works'
-    print('Scraping:', url)
+
+    scrape_date = datetime.datetime.now().strftime("%Y%b%d")
+    base_url = 'https://archiveofourown.org/tags/'+quote(fandom)+'/works?page='
     headers = {'user-agent' : header_info}
-    #find out how many pages and then do for each page
-    req = requests.get(url, headers=headers)
-    if req.status_code != 200:
+    page_count = 1
+
+    print(f'Scraping: {base_url}')
+
+    loaded, soup = get_soup(base_url, page_count, headers)
+    
+    if loaded == False:
         print('Access Denied')
         error_row = [fandom] + ['Access Denied']
         errorwriter.writerow(error_row)
         return
+    
+    max_pages = int(soup.find('li', class_='next').find_previous('li').text)
 
-    soup = BeautifulSoup(req.text, 'html.parser')
-    works = soup.find_all(class_="work blurb group")
-    for work in works:
-        tags = get_tags(work)
-        req_tags = get_required_tags(work)
-        stats = get_stats(work)
-        header_tags = get_header(work)
-        fandoms = get_fandoms(work)
-        summary = get_summary(work)
-        updated = get_updated(work)
-        series = get_series(work)
-        row = header_tags + req_tags + fandoms + list(map(lambda x: ', '.join(x), tags)) + summary + stats + series + updated + [scrape_date]
-        try:
-            writer.writerow(row)
-        except:
-            print('Unexpected error: ', sys.exc_info()[0])
-            #error_row = [fic_id] +  [sys.exc_info()[0]]
-            #errorwriter.writerow(error_row)
+    while page_count < max_pages+1 and loaded:
+        works = soup.find_all(class_="work blurb group")
+        for work in works:
+            row = scrape_work(work, scrape_date)
+            try:
+                writer.writerow(row)
+            except:
+                print('Unexpected error: ', sys.exc_info()[0])
+                #error_row = [fic_id] +  [sys.exc_info()[0]]
+                #errorwriter.writerow(error_row)
+        page_count += 1
+        loaded, soup = get_soup(base_url, page_count, headers)
+
 
     print('Done.')
-
 
 def get_args(): 
     parser = argparse.ArgumentParser(description='Scrape and save some fanfic, given their AO3 IDs.')
@@ -181,7 +203,10 @@ def scrape(fandom, csv_out, headers, restart, is_csv):
             #does the csv already exist? if not, let's write a header row.
             if os.stat(csv_out).st_size == 0:
                 print('Writing a header row for the csv.')
-                header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings', 'category', 'status', 'fandom', 'relationship', 'character', 'additional tags', 'summary','language', 'words', 'chapters', 'collections', 'comments', 'kudos', 'bookmarks', 'hits', 'series_part', 'series_name', 'updated', 'scrape_date']
+                header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings', 'category',
+                     'status', 'fandom', 'relationship', 'character', 'additional tags', 'summary',
+                     'language', 'words', 'chapters', 'collections', 'comments', 'kudos', 'bookmarks', 
+                     'hits', 'series_part', 'series_name', 'updated', 'scrape_date']
                 writer.writerow(header)
             if is_csv:
                 with open("errors_" + csv_out, 'r+') as f_in:
@@ -206,7 +231,6 @@ def scrape(fandom, csv_out, headers, restart, is_csv):
             else:
                 write_fic_to_csv(fandom, writer, errorwriter, headers)
                 time.sleep(delay)
-
 
 if __name__== "__main__":
     fandom, csv_out, headers, restart, is_csv = get_args()

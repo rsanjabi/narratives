@@ -160,9 +160,6 @@ def get_args():
 		ofc = False
 	return fic_ids, csv_out, headers, restart, is_csv, ofc
 
-'''
-
-'''
 def process_id(fic_id, restart, found):
 	if found:
 		return True
