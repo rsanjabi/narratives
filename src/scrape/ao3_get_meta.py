@@ -58,12 +58,22 @@ def get_header(work):
     result = work.find('h4', class_='heading').find_all('a')
     work_id = result[0].get('href').strip('/works/')
     title = result[0].text
-    author = result[1].text
-    if len(result) == 3:
-        gifted = result[2].text
+    
+    auth_list = []
+    header_text = work.find('h4', class_='heading').text
+    if "Anonymous" in header_text:
+        auth_list.append("Anonymous")
     else:
-        gifted = ""
-    return [work_id, title, author, gifted]
+        authors = work.find_all('a', rel='author')
+        for author in authors:
+            auth_list.append(author.text)
+    gifted = []
+    for link in result:
+        href = link.get('href')
+        if 'gifts' in href:
+            gifted.append(link.text)
+            
+    return [work_id, title, auth_list, gifted]
 
 def get_fandoms(work):
     fandoms = ''
@@ -79,7 +89,7 @@ def get_fandoms(work):
 
 def get_summary(work):
     try:
-        summary = work.find('blockquote', class_='userstuff summary').text.strip()
+        summary = work.find('blockquote', class_='userstuff summary').text.strip().replace("\n", " ")
     except AttributeError as e:
         summary = ""
     return [summary]
@@ -190,7 +200,7 @@ def process_id(fic_id, restart, found):
         return False
 
 def scrape(fandom, csv_out, headers, restart, is_csv):
-    delay = 2
+    delay = 4
     fandom_dir = replace_symbol(fandom)
     data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/raw/meta/'+fandom_dir)
     if not os.path.exists(data_path):
