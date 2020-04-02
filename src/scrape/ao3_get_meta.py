@@ -62,18 +62,26 @@ def get_header(work):
     auth_list = []
     header_text = work.find('h4', class_='heading').text
     if "Anonymous" in header_text:
-        auth_list.append("Anonymous")
+        auth = "Anonymous"
     else:
         authors = work.find_all('a', rel='author')
         for author in authors:
             auth_list.append(author.text)
-    gifted = []
+        auth = str(auth_list).replace('[', '').replace(']', '')
+        
+    gift_list = []
     for link in result:
         href = link.get('href')
         if 'gifts' in href:
-            gifted.append(link.text)
+            gift_list.append(link.text)
             
-    return [work_id, title, auth_list, gifted]
+    if len(gift_list) == 0:
+        gift = ""
+    else:
+        gift = str(gift_list).replace('[', '').replace(']', '')
+            
+    return [work_id, title, auth, gift]
+
 
 def get_fandoms(work):
     fandoms = ''

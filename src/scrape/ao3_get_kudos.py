@@ -9,6 +9,12 @@ import sys
 import datetime
 import argparse
 
+'''
+Pass in Fandom Name
+Reads in data/fandom/meta.csv
+Writes out data/fandom/kudos.csv
+'''
+
 def get_args():
 
     parser = argparse.ArgumentParser(description='Scrape AO3 work IDs to find all named users who gave kudos')
