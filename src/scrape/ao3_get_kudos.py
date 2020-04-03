@@ -1,25 +1,19 @@
-import pandas as pd
-from bs4 import BeautifulSoup
-import re
+#!/usr/bin/env python
+
 import time
-import requests
 import os
 import csv
 import sys
-import datetime
 import argparse
-
-'''
-Pass in Fandom Name
-Reads in data/fandom/meta.csv
-Writes out data/fandom/kudos.csv
-'''
+import requests
+from bs4 import BeautifulSoup
 
 def get_args():
+    """Converts command line arguments into variables."""
 
-    parser = argparse.ArgumentParser(description='Scrape AO3 work IDs to find all named users who gave kudos')
-    parser.add_argument('--in_csv', default='fanworks_ids.csv',help='csv input file name')
-    parser.add_argument('--out_csv', default='fanworks_kudos.csv',help='csv output file name')
+    parser = argparse.ArgumentParser(description='Scrape AO3 work IDs to find users who gave kudos')
+    parser.add_argument('--in_csv', default='fanworks_ids.csv', help='csv input file name')
+    parser.add_argument('--out_csv', default='fanworks_kudos.csv', help='csv output file name')
     parser.add_argument('--restart', default='', help='work_id to start at from within a csv')
     parser.add_argument('--header', default='', help='user http header')
 
@@ -32,6 +26,7 @@ def get_args():
     return input_file, output_file, restart, headers
 
 def process_id(work_id, restart, found):
+    """ Not found and not restart """
     if found:
         return True
     if work_id == restart:
@@ -44,7 +39,7 @@ def access_denied(soup):
     Possible tags to search for when kudos file is not found
     Stub function to add to as needed
     '''
-    if (soup.find(class_="flash error")):
+    if soup.find(class_="flash error"):
         pass
     return False
 
@@ -52,7 +47,7 @@ def write_kudo_to_csv(work_id, writer, errorwriter, header_info=''):
     '''
     work_id is the AO3 ID of a work
     writer is a csv writer object
-    the output of this program is a row in the CSV file containing works ID and 
+    the output of this program is a row in the CSV file containing works ID and
         username who gave it kudos
     header_info should be the header info to encourage ethical scraping.
     '''
@@ -60,7 +55,7 @@ def write_kudo_to_csv(work_id, writer, errorwriter, header_info=''):
 
     url = 'http://archiveofourown.org/works/'+str(work_id)+'/kudos'
     headers = {'user-agent' : header_info}
-    
+
     req = requests.get(url, headers=headers)
     if req.status_code != 200:
         print('Access Denied')
@@ -70,8 +65,8 @@ def write_kudo_to_csv(work_id, writer, errorwriter, header_info=''):
 
     src = req.text
     soup = BeautifulSoup(src, 'html.parser')
-    
-    if (access_denied(soup)):
+
+    if access_denied(soup):
         print('Access Denied')
         error_row = [work_id] + ['Access Denied']
         errorwriter.writerow(error_row)
@@ -79,8 +74,8 @@ def write_kudo_to_csv(work_id, writer, errorwriter, header_info=''):
         try:
             kudo_soup = soup.find(id="kudos").find_all('a')
             # Convert to set then back to list to remove duplicates
-            kudo_list = [x.text for x in list(set(kudo_soup))]  
-        except AttributeError as e:
+            kudo_list = [x.text for x in list(set(kudo_soup))]
+        except AttributeError:
             kudo_list = []
         for kudo in kudo_list:
             row = [work_id] + [kudo]
@@ -93,6 +88,7 @@ def write_kudo_to_csv(work_id, writer, errorwriter, header_info=''):
         print('Done.')
 
 def main():
+    """ Open file and do the scraping """
 
     csv_in, csv_out, restart, headers = get_args()
     delay = 5
@@ -114,7 +110,7 @@ def main():
                             continue
                         write_kudo_to_csv(row[0], writer, errorwriter, headers)
                         time.sleep(delay)
-                else: 
+                else:
                     found_restart = False
                     for row in reader:
                         if not row:

@@ -1,16 +1,7 @@
-from gather.scrape_lists import ListScraper 
-from gather.scrape_work import WorkScraper
-import yaml
+#!/usr/bin/env python
 
-try:
-    with open('config.yaml', 'r') as file:
-        config = yaml.safe_load(file)
-except Exception as e:
-    print('Error reading yaml configuration file.')
+import scrape.ao3_get_meta as meta
+#import src.scrape.ao3_get_kudos as kudos
+import config as cfg
 
-#works = ListScraper(config)
-#works.scrape()
-
-work = WorkScraper(str(config['test_id']))
-work.scrape()
-work.print()
+meta.scrape(cfg.TEST_FANDOM, 'meta.csv', cfg.HEADERS, '', False)

@@ -1,14 +1,20 @@
-import requests
-from bs4 import BeautifulSoup
+#!/usr/bin/env python
+
 import argparse
-import time, datetime
+import time
+import datetime
 import os
 import csv
 import sys
-from unidecode import unidecode
-from pathvalidate import replace_symbol, is_valid_filename
 from urllib.parse import quote
+import requests
+from bs4 import BeautifulSoup
+from pathvalidate import replace_symbol
+from unidecode import unidecode
+import config as cfg
 
+DELAY = cfg.DELAY
+RAW_PATH = cfg.RAW_PATH
 
 def get_tag_info(category, meta):
     '''
@@ -16,16 +22,17 @@ def get_tag_info(category, meta):
     '''
     try:
         tag_list = meta.find_all("li", class_=str(category))
-    except AttributeError as e:
+    except AttributeError:
         return []
-    return [unidecode(result.text) for result in tag_list] 
+    return [unidecode(result.text) for result in tag_list]
 
 def get_stats(work):
     '''
-    returns a list of  
+    returns a list of
     language, published, status, date status, words, chapters, comments, kudos, bookmarks, hits
     '''
-    categories = ['language', 'words', 'chapters', 'collections', 'comments', 'kudos', 'bookmarks', 'hits'] 
+    categories = ['language', 'words', 'chapters', 'collections', 'comments',\
+                     'kudos', 'bookmarks', 'hits']
     stats = []
     for cat in categories:
         try:
@@ -33,10 +40,10 @@ def get_stats(work):
         except:
             result = ""
         stats.append(result)
-    
+
     #stats[0] = stats[0].rstrip().lstrip() #language has weird whitespace characters
 
-    return stats      
+    return stats
 
 def get_tags(meta):
     '''
@@ -54,11 +61,11 @@ def get_header(work):
     '''
     returns work_id, title, author, gifted to user
     '''
-    
+
     result = work.find('h4', class_='heading').find_all('a')
     work_id = result[0].get('href').strip('/works/')
     title = result[0].text
-    
+
     auth_list = []
     header_text = work.find('h4', class_='heading').text
     if "Anonymous" in header_text:
@@ -68,18 +75,18 @@ def get_header(work):
         for author in authors:
             auth_list.append(author.text)
         auth = str(auth_list).replace('[', '').replace(']', '')
-        
+
     gift_list = []
     for link in result:
         href = link.get('href')
         if 'gifts' in href:
             gift_list.append(link.text)
-            
+
     if len(gift_list) == 0:
         gift = ""
     else:
         gift = str(gift_list).replace('[', '').replace(']', '')
-            
+
     return [work_id, title, auth, gift]
 
 
@@ -90,22 +97,22 @@ def get_fandoms(work):
         fan_list = [x.text for x in tag_list]
         fandoms = ", ".join(fan_list)
 
-    except AttributeError as e:
+    except AttributeError:
         return []
-    
+
     return [fandoms]
 
 def get_summary(work):
     try:
-        summary = work.find('blockquote', class_='userstuff summary').text.strip().replace("\n", " ")
-    except AttributeError as e:
+        summary = work.find('blockquote', class_='userstuff summary').text.strip().replace('\n', '')
+    except AttributeError:
         summary = ""
     return [summary]
 
 def get_updated(work):
     try:
         date = work.find('p', class_='datetime').text
-    except AttributeError as e:
+    except AttributeError:
         date = ""
     return [date]
 
@@ -114,7 +121,7 @@ def get_series(work):
         series = work.find('ul', class_='series')
         part = series.find('strong').text
         s_name = series.find('a').text
-    except AttributeError as e:
+    except AttributeError:
         part, s_name = "", ""
     return [part, s_name]
 
@@ -142,23 +149,22 @@ def get_soup(base_url, i, headers):
     else:
         return False, None
 
-def write_fic_to_csv(fandom, writer, errorwriter, header_info=''):
+def write_fic_to_csv(fandom, writer, errorwriter, headers=''):
 
     scrape_date = datetime.datetime.now().strftime("%Y%b%d")
     base_url = 'https://archiveofourown.org/tags/'+quote(fandom)+'/works?page='
-    headers = {'user-agent' : header_info}
     page_count = 1
 
     print(f'Scraping: {base_url}')
 
     loaded, soup = get_soup(base_url, page_count, headers)
-    
-    if loaded == False:
+
+    if not loaded:
         print('Access Denied')
         error_row = [fandom] + ['Access Denied']
         errorwriter.writerow(error_row)
         return
-    
+
     max_pages = int(soup.find('li', class_='next').find_previous('li').text)
 
     while page_count < max_pages+1 and loaded:
@@ -177,8 +183,11 @@ def write_fic_to_csv(fandom, writer, errorwriter, header_info=''):
 
     print('Done.')
 
-def get_args(): 
-    parser = argparse.ArgumentParser(description='Scrape and save some fanfic, given their AO3 IDs.')
+def get_args():
+    '''
+    TODO: Is this still useful? If so, fix headers so not a dict
+    '''
+    parser = argparse.ArgumentParser(description='Scrape and save some fanfic, given their AO3 IDs')
     parser.add_argument(
         'fandom', metavar='FANDOM', nargs='+',
         help='a single fandom in quotes or a csv input filename')
@@ -189,11 +198,11 @@ def get_args():
         '--header', default='',
         help='user http header')
     parser.add_argument(
-        '--restart', default='', 
+        '--restart', default='',
         help='work_id to start at from within a csv')
     args = parser.parse_args()
     fandom = str(args.fandom[0])
-    is_csv = False               # Replace this with code to pick up a certain page number if interrupted
+    is_csv = False      # Replace this with code to pick up a certain page number if interrupted
     csv_out = str(args.csv)
     headers = str(args.header)
     restart = str(args.restart)
@@ -208,9 +217,8 @@ def process_id(fic_id, restart, found):
         return False
 
 def scrape(fandom, csv_out, headers, restart, is_csv):
-    delay = 4
     fandom_dir = replace_symbol(fandom)
-    data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../data/raw/meta/'+fandom_dir)
+    data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), RAW_PATH+fandom_dir)
     if not os.path.exists(data_path):
         os.makedirs(data_path)
     os.chdir(data_path)
@@ -222,9 +230,10 @@ def scrape(fandom, csv_out, headers, restart, is_csv):
             if os.stat(csv_out).st_size == 0:
                 print('Writing a header row for the csv.')
                 header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings', 'category',
-                     'status', 'fandom', 'relationship', 'character', 'additional tags', 'summary',
-                     'language', 'words', 'chapters', 'collections', 'comments', 'kudos', 'bookmarks', 
-                     'hits', 'series_part', 'series_name', 'updated', 'scrape_date']
+                          'status', 'fandom', 'relationship', 'character', 'additional tags',
+                          'summary', 'language', 'words', 'chapters', 'collections', 'comments',
+                          'kudos', 'bookmarks', 'hits', 'series_part', 'series_name', 'updated',
+                          'scrape_date']
                 writer.writerow(header)
             if is_csv:
                 with open("errors_" + csv_out, 'r+') as f_in:
@@ -234,22 +243,23 @@ def scrape(fandom, csv_out, headers, restart, is_csv):
                             if not row:
                                 continue
                             write_fic_to_csv(row[0], writer, errorwriter, headers)
-                            time.sleep(delay)
-                    else: 
+                            time.sleep(DELAY)
+                    else:
                         found_restart = False
                         for row in reader:
                             if not row:
                                 continue
-                            found_restart = process_id(row[0], restart, found_restart)  # TODO rewrite for restart to work restart at page??
+                            # TODO rewrite for restart to work restart at page??
+                            found_restart = process_id(row[0], restart, found_restart)
                             if found_restart:
                                 write_fic_to_csv(row[0], writer, errorwriter, headers)
-                                time.sleep(delay)
+                                time.sleep(DELAY)
                             else:
                                 print('Skipping already processed fic')
             else:
                 write_fic_to_csv(fandom, writer, errorwriter, headers)
-                time.sleep(delay)
+                time.sleep(DELAY)
 
-if __name__== "__main__":
+if __name__ == "__main__":
     fandom, csv_out, headers, restart, is_csv = get_args()
     scrape(fandom, csv_out, headers, restart, is_csv)
