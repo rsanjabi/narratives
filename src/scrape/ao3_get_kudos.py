@@ -1,4 +1,25 @@
 #!/usr/bin/env python
+"""Scraping tool to get a list of kudos for a list of fanworks.
+
+Set config options such as the time delay for each http request in config.py
+
+Output is in csv format of <fandom_id>,<named_kudo_giver>
+
+Input is a csv where the first field is a fandom_id.
+
+Example URL to be scraped:
+
+    https://archiveofourown.org/works/14927703/kudos
+
+Example:
+
+    scrap.ao3_get_kudos(in_csv_file, out_csv_file, restart, header_string)
+
+TODO:
+    * Refactor to ensure all module level variables synced with config.py
+    * Remove get_args functionality
+
+"""
 
 import time
 import os
@@ -81,7 +102,7 @@ def write_kudo_to_csv(work_id, writer, errorwriter, header_info=''):
             row = [work_id] + [kudo]
             try:
                 writer.writerow(row)
-            except:
+            except csv.Error:
                 print('Unexpected error: ', sys.exc_info()[0])
                 error_row = [work_id] +  [sys.exc_info()[0]]
                 errorwriter.writerow(error_row)
