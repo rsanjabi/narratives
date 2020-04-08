@@ -6,5 +6,5 @@ import scrape.ao3_get_kudos as kudos
 import config as cfg
 
 
-#meta.scrape(cfg.TEST_FANDOM, 'meta.csv', True, False)
+meta.scrape(cfg.TEST_FANDOM, 'meta.csv', True, False)
 kudos.scrape(cfg.TEST_FANDOM, 'meta.csv', 'kudos.csv', '')

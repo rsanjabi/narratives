@@ -2,8 +2,8 @@ from prefect import Flow, task, Parameter
 #import sys
 #sys.path.append('/Users/rebecca/projects/personal/fan related/AO3Scraper')
 
-import ao3_work_ids as ids
-import ao3_get_fanfics as works
+import src.ao3_work_ids as ids
+import src.ao3_get_fanfics as works
 
 @task
 def get_IDs():
