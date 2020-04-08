@@ -8,4 +8,5 @@ __pycache__/
 env/
 notebooks/.ipynb_checkpoints/
 notebooks/Messing Around.ipynb
+notebooks/.ipynb_checkpoints/Messing\ Around-checkpoint.ipynb
 Procfile
