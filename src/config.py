@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ Module-wide constants"""
 
 # Wait time between AO3 requests in seconds

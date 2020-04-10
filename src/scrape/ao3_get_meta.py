@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Scraping tool to get meta information from a given fandom.
 
 Set config options such as the time delay for each http request in config.py

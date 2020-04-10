@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Scraping tool to get a list of kudos for a list of fanworks.
 
 Set config options such as the time DELAY for each http request in config.py
