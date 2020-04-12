@@ -15,10 +15,9 @@ Example URL to be scraped:
 
 Example:
 
-    scrap.ao3_get_kudos(in_csv_file, out_csv_file, restart, header_string)
+    scrap.ao3_get_kudos(fandom, csv_out='meta', from_the_top=True)
 
 TODO:
-    * rewrite for restart to work restart at page??
 
 """
 
@@ -232,7 +231,7 @@ def write_works(fandom, writer, start_page=1):
 
 
 def init_path(fandom):
-    ''' Initialize paths '''
+    ''' Initialize data paths creating directories as needed'''
 
     fandom_dir = replace_symbol(fandom)
     data_path = os.path.join(

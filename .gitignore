@@ -6,8 +6,9 @@ docs/
 __pycache__/
 .DS_Store
 env/
+.venv/
 notebooks/.ipynb_checkpoints/
 notebooks/Messing Around.ipynb
-notebooks/.ipynb_checkpoints/Messing\ Around-checkpoint.ipynb
+notebooks/.ipynb_checkpoints/
 Procfile
-.venv/
+
