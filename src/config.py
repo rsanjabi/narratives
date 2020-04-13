@@ -15,3 +15,6 @@ HTTP_HEADERS = {'User-Agent': 'Scraping meta for fan analysis; Contact rebecca.s
 
 # When testing a single fandom
 TEST_FANDOM = 'Star Wars: The Clone Wars (2008) - All Media Types'
+
+# How many attempts at requesting page before quitting
+MAX_ERRORS = 3

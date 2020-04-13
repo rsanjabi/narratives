@@ -38,6 +38,7 @@ import logging
 DELAY = cfg.DELAY
 RAW_PATH = cfg.RAW_PATH
 HTTP_HEAD = cfg.HTTP_HEADERS
+MAX_ERRORS = cfg.MAX_ERRORS
 
 
 def get_tag_info(category, meta):
@@ -207,6 +208,7 @@ def write_works(fandom, writer, start_page=1):
         return
 
     max_pages = int(soup.find('li', class_='next').find_previous('li').text)
+    errors = 0
 
     while start_page < max_pages+1:
         time.sleep(DELAY)
@@ -224,9 +226,14 @@ def write_works(fandom, writer, start_page=1):
             soup = get_soup(base_url, start_page)
             logging.info(f'PAGE: {start_page}')
         except Exception:
-            logging.error(f"Unable to load {base_url}")
-            logging.info(f'Logged through page: {start_page}')
-            return
+            logging.error(f"Unable to load {base_url+start_page}")
+            start_page -= 1
+            errors += 1
+            if errors > MAX_ERRORS:
+                logging.info(f'Logged through page: {start_page}')
+                return
+            else:
+                logging.error(f"Error attempts: {errors}")
     logging.info(f'Logged through page: {start_page}')
 
 
@@ -245,25 +252,20 @@ def find_last_page(csv_out):
     ''' Parse log file to find last page scraped '''
 
     page = 1
-    try:
-        with open(csv_out+'.log', 'r') as f_log:
-            found = False
-            count = -1
-            while not found:
-                line = f_log.readlines()[count]
-                if 'Scraping complete' in line:
-                    logging.info('No new pages to scrape')
-                    return
-                if 'PAGE' in line:
-                    page = int(line.split()[2])
-                    return page
-                count -= 1
-    except FileNotFoundError:
-        msg = "Can't find log file. Has fandom been scraped previously?"
-        logging.warning(msg)
-    except IndexError:
-        logging.warning("Unable to find last page to start scraping.")
-    return page
+ 
+    with open(csv_out+'.log', 'w') as f_log:
+        found = False
+        count = -1
+        while not found:
+            line = f_log.readlines()[count]
+            if 'Scraping complete' in line:
+                logging.info('No new pages to scrape')
+                return
+            if 'PAGE:' in line:
+                page = int(line.split()[2])
+                logging.debug('')
+                return page
+            count -= 1
 
 
 def scrape(fandom, csv_out='meta', from_the_top=True):
@@ -296,12 +298,27 @@ def scrape(fandom, csv_out='meta', from_the_top=True):
             logging.info('Scraping complete.')
     # Find out where we left of at
     else:
-        with open(csv_out+'.csv', 'a') as f_out:
-            logging.basicConfig(filename=csv_out+'.log',
-                                filemode='a',
-                                format='%(asctime)s-%(levelname)s-%(message)s',
-                                level=logging.INFO)
-            writer = csv.writer(f_out)
+        try:
             page = find_last_page(csv_out)
+            msg = f"Restarting with {page}"
+            error_flag = False
+        except FileNotFoundError:
+            error_flag = True
+            msg = "Can't find log file. Has fandom been scraped previously?"
+        except IndexError:
+            error_flag = True
+            msg = "Unable to find last page to start scraping."
+        except Exception as e:
+            error_flag = True
+            msg = e
+        logging.basicConfig(filename=csv_out+'.log',
+                            filemode='a',
+                            format='%(asctime)s-%(levelname)s-%(message)s',
+                            level=logging.INFO)
+        if error_flag:
+            logging.error(msg)
+            return
+        with open(csv_out+'.csv', 'a') as f_out:
+            writer = csv.writer(f_out)
             write_works(fandom, writer, start_page=page)
             logging.info('Scraping complete.')
