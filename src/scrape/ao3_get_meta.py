@@ -4,25 +4,23 @@
 Set config options such as the time delay for each http request in config.py
 
 Output is in csv format:
-        header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings', 'category',
-                'status', 'fandom', 'relationship', 'character', 'additional tags',
-                'summary', 'language', 'words', 'chapters', 'collections', 'comments',
-                'kudos', 'bookmarks', 'hits', 'series_part', 'series_name', 'updated',
-                'scrape_date']
+        header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
+            'category', 'status', 'fandom', 'relationship', 'character',
+            'additional tags','summary', 'language', 'words', 'chapters',
+            'collections','comments', 'kudos', 'bookmarks', 'hits',
+            'series_part', 'series_name', 'updated', 'scrape_date']
 
 Example URL to be scraped:
     https://archiveofourown.org/tags/Harry%20Potter%20-%20J*d*%20K*d*%20Rowling/works
 
 Example:
 
-    scrap.ao3_get_kudos(in_csv_file, out_csv_file, restart, header_string)
+    scrap.ao3_get_kudos(fandom, csv_out='meta', from_the_top=True)
 
 TODO:
-    * rewrite for restart to work restart at page??
-    * remove get_args()
 
 """
-import argparse
+
 import time
 import datetime
 import os
@@ -34,10 +32,13 @@ from bs4 import BeautifulSoup
 from pathvalidate import replace_symbol
 from unidecode import unidecode
 import config as cfg
+import logging
+
 
 DELAY = cfg.DELAY
 RAW_PATH = cfg.RAW_PATH
 HTTP_HEAD = cfg.HTTP_HEADERS
+
 
 def get_tag_info(category, meta):
     """ Find relationships, characters, and freeforms tags."""
@@ -47,14 +48,15 @@ def get_tag_info(category, meta):
         return []
     return [unidecode(result.text) for result in tag_list]
 
+
 def get_stats(work):
     """
-    Find stats (language, published, status, date status, words, chapters, comments,
-    kudos, bookmarks, hits
+    Find stats (language, published, status, date status, words, chapters,
+    comments, kudos, bookmarks, hits
     """
 
-    categories = ['language', 'words', 'chapters', 'collections', 'comments',\
-                     'kudos', 'bookmarks', 'hits']
+    categories = ['language', 'words', 'chapters', 'collections', 'comments',
+                  'kudos', 'bookmarks', 'hits']
     stats = []
     for cat in categories:
         try:
@@ -62,10 +64,8 @@ def get_stats(work):
         except AttributeError:
             result = ""
         stats.append(result)
-
-    #stats[0] = stats[0].rstrip().lstrip() #language has weird whitespace characters
-
     return stats
+
 
 def get_tags(meta):
     """Find relationships, characters, and freeforms tags"""
@@ -73,11 +73,13 @@ def get_tags(meta):
     tags = ['relationships', 'characters', 'freeforms']
     return list(map(lambda tag: get_tag_info(tag, meta), tags))
 
+
 def get_required_tags(work):
     """Finds required tags."""
 
     req_tags = work.find(class_='required-tags').find_all('a')
     return [x.text for x in req_tags]
+
 
 def get_header(work):
     """Finds header information (work_id, title, author, gifted to user)."""
@@ -94,7 +96,8 @@ def get_header(work):
         authors = work.find_all('a', rel='author')
         for author in authors:
             auth_list.append(author.text)
-        auth = str(auth_list).replace('[', '').replace(']', '').replace("'", '')
+        auth_str = str(auth_list)
+        auth = auth_str.replace('[', '').replace(']', '').replace("'", '')
 
     gift_list = []
     for link in result:
@@ -105,7 +108,8 @@ def get_header(work):
     if len(gift_list) == 0:
         gift = ""
     else:
-        gift = str(gift_list).replace('[', '').replace(']', '').replace("'", '')
+        gift_str = str(gift_list)
+        gift = gift_str.replace('[', '').replace(']', '').replace("'", '')
 
     return [work_id, title, auth, gift]
 
@@ -123,6 +127,7 @@ def get_fandoms(work):
 
     return [fandoms]
 
+
 def get_summary(work):
     """ Find summary description and return as list of strings. """
 
@@ -133,6 +138,7 @@ def get_summary(work):
         summary = ""
     return [summary]
 
+
 def get_updated(work):
     """ Find update date. Return as list of strings. """
 
@@ -141,6 +147,7 @@ def get_updated(work):
     except AttributeError:
         date = ""
     return [date]
+
 
 def get_series(work):
     """ Find series info and return as list. """
@@ -153,8 +160,9 @@ def get_series(work):
         part, s_name = "", ""
     return [part, s_name]
 
+
 def scrape_work(work, scrape_date):
-    """ Find each HTML element and parse out the details into a row (string). """
+    """ Find each HTML element and parse out the details into a row. """
 
     tags = get_tags(work)
     req_tags = get_required_tags(work)
@@ -165,42 +173,42 @@ def scrape_work(work, scrape_date):
     updated = get_updated(work)
     series = get_series(work)
     row = header_tags + req_tags + fandoms + \
-        list(map(lambda x: ', '.join(x), tags)) + summary + stats + series + updated + [scrape_date]
+        list(map(lambda x: ', '.join(x), tags)) + summary + stats + series + \
+        updated + [scrape_date]
     return row
+
 
 def get_soup(base_url, i):
     """ Scrape the page, returning success and soup."""
 
     cur_url = base_url+str(i)
-    print(f"Scraping page: {cur_url}")
     req = requests.get(cur_url, headers=HTTP_HEAD)
     if req.status_code == 200:
         src = req.text
         soup = BeautifulSoup(src, 'html.parser')
-        return True, soup
+        return soup
     else:
-        return False, None
+        raise Exception("Page not found.")
 
-def write_fic_to_csv(fandom, writer, errorwriter):
+
+def write_works(fandom, writer, start_page=1):
     """ Write meta information for each fandom as one row in the csv. """
 
     scrape_date = datetime.datetime.now().strftime("%Y%b%d")
     base_url = 'https://archiveofourown.org/tags/'+quote(fandom)+'/works?page='
-    page_count = 1
+    logging.info(f"Base url to scrape: {base_url}")
 
-    print(f'Scraping: {base_url}')
-
-    loaded, soup = get_soup(base_url, page_count)
-
-    if not loaded:
-        print('Access Denied')
-        error_row = [fandom] + ['Access Denied']
-        errorwriter.writerow(error_row)
+    try:
+        soup = get_soup(base_url, start_page)
+        logging.info(f'PAGE: {start_page}')
+    except Exception:
+        logging.error(f"Unable to load {base_url+str(start_page)}")
+        logging.info(f'Logged through page: {start_page}')
         return
 
     max_pages = int(soup.find('li', class_='next').find_previous('li').text)
 
-    while page_count < max_pages+1 and loaded:
+    while start_page < max_pages+1:
         time.sleep(DELAY)
         works = soup.find_all(class_="work blurb group")
         for work in works:
@@ -208,97 +216,92 @@ def write_fic_to_csv(fandom, writer, errorwriter):
             try:
                 writer.writerow(row)
             except csv.Error:
-                print('Unexpected error: ', sys.exc_info()[0])
-                #error_row = [fic_id] +  [sys.exc_info()[0]]
-                #errorwriter.writerow(error_row)
-        page_count += 1
-        loaded, soup = get_soup(base_url, page_count)
+                error_msg = 'Unexpected error writing to csv: ' + \
+                    start_page+[sys.exc_info()[0]]
+                logging.error(error_msg)
+        start_page += 1
+        try:
+            soup = get_soup(base_url, start_page)
+            logging.info(f'PAGE: {start_page}')
+        except Exception:
+            logging.error(f"Unable to load {base_url}")
+            logging.info(f'Logged through page: {start_page}')
+            return
+    logging.info(f'Logged through page: {start_page}')
 
-    print('Done.')
 
-def get_args():
-    """Get arguments for CLI
-        TODO: Is this still useful?
-    """
-    parser = argparse.ArgumentParser(description='Scrape and save some fanfic, given their AO3 IDs')
-    parser.add_argument(
-        'fandom', metavar='FANDOM', nargs='+',
-        help='a single fandom in quotes or a csv input filename')
-    parser.add_argument(
-        '--csv', default='meta.csv',
-        help='csv output file name')
-    parser.add_argument(
-        '--header', default='',
-        help='user http header')
-    parser.add_argument(
-        '--restart', default='',
-        help='work_id to start at from within a csv')
-    args = parser.parse_args()
-    fandom = str(args.fandom[0])
-    is_csv = False      # Replace this with code to pick up a certain page number if interrupted
-    csv_out = str(args.csv)
-    restart = str(args.restart)
-    return fandom, csv_out, restart, is_csv
-
-def process_id(fic_id, restart, found):
-    """Check to see the work is already found or needs to be restarted."""
-
-    if found:
-        return True
-    if fic_id == restart:
-        return True
-    else:
-        return False
-
-def scrape(fandom, csv_out, restart, is_csv):
-    """Initialize and commence scraping."""
+def init_path(fandom):
+    ''' Initialize data paths creating directories as needed'''
 
     fandom_dir = replace_symbol(fandom)
-    data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), RAW_PATH+fandom_dir)
+    data_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), RAW_PATH+fandom_dir)
     if not os.path.exists(data_path):
         os.makedirs(data_path)
     os.chdir(data_path)
-    with open(csv_out, 'a') as f_out:
-        writer = csv.writer(f_out)
-        with open("errors_" + csv_out, 'a') as e_out:
-            errorwriter = csv.writer(e_out)
-            #does the csv already exist? if not, let's write a header row.
-            if os.stat(csv_out).st_size == 0:
-                print('Writing a header row for the csv.')
-                header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings', 'category',
-                          'status', 'fandom', 'relationship', 'character', 'additional tags',
-                          'summary', 'language', 'words', 'chapters', 'collections', 'comments',
-                          'kudos', 'bookmarks', 'hits', 'series_part', 'series_name', 'updated',
-                          'scrape_date']
-                writer.writerow(header)
-            if is_csv:
-                with open("errors_" + csv_out, 'r+') as f_in:
-                    reader = csv.reader(f_in)
-                    if restart is '':
-                        for row in reader:
-                            if not row:
-                                continue
-                            write_fic_to_csv(row[0], writer, errorwriter)
-                            time.sleep(DELAY)
-                    else:
-                        found_restart = False
-                        for row in reader:
-                            if not row:
-                                continue
-                            found_restart = process_id(row[0], restart, found_restart)
-                            if found_restart:
-                                write_fic_to_csv(row[0], writer, errorwriter)
-                                time.sleep(DELAY)
-                            else:
-                                print('Skipping already processed fic')
-            else:
-                write_fic_to_csv(fandom, writer, errorwriter)
-                time.sleep(DELAY)
 
-def main():
-    """Steps required when running as stand alone script. """
-    fandom, csv_out, restart, is_csv = get_args()
-    scrape(fandom, csv_out, restart, is_csv)
 
-if __name__ == "__main__":
-    main()
+def find_last_page(csv_out):
+    ''' Parse log file to find last page scraped '''
+
+    page = 1
+    try:
+        with open(csv_out+'.log', 'r') as f_log:
+            found = False
+            count = -1
+            while not found:
+                line = f_log.readlines()[count]
+                if 'Scraping complete' in line:
+                    logging.info('No new pages to scrape')
+                    return
+                if 'PAGE' in line:
+                    page = int(line.split()[2])
+                    return page
+                count -= 1
+    except FileNotFoundError:
+        msg = "Can't find log file. Has fandom been scraped previously?"
+        logging.warning(msg)
+    except IndexError:
+        logging.warning("Unable to find last page to start scraping.")
+    return page
+
+
+def scrape(fandom, csv_out='meta', from_the_top=True):
+    """Initialize and commence scraping."""
+
+    init_path(fandom)
+    # check to see if the file is empty
+    try:
+        empty = (os.path.getsize(csv_out+'.csv') == 0)
+    except OSError:
+        empty = True
+
+    # Start from the top
+    if from_the_top or empty:
+        with open(csv_out+'.csv', 'w') as f_out:
+            logging.basicConfig(filename=csv_out+'.log',
+                                filemode='w',
+                                format='%(asctime)s-%(levelname)s-%(message)s',
+                                level=logging.INFO)
+            writer = csv.writer(f_out)
+            logging.info('Writing a header row for the csv.')
+            header = ['work_id', 'title', 'author', 'gifted', 'rating',
+                      'warnings', 'category', 'status', 'fandom',
+                      'relationship', 'character', 'additional tags',
+                      'summary', 'language', 'words', 'chapters',
+                      'collections', 'comments', 'kudos', 'bookmarks', 'hits',
+                      'series_part', 'series_name', 'updated', 'scrape_date']
+            writer.writerow(header)
+            write_works(fandom, writer, start_page=1)
+            logging.info('Scraping complete.')
+    # Find out where we left of at
+    else:
+        with open(csv_out+'.csv', 'a') as f_out:
+            logging.basicConfig(filename=csv_out+'.log',
+                                filemode='a',
+                                format='%(asctime)s-%(levelname)s-%(message)s',
+                                level=logging.INFO)
+            writer = csv.writer(f_out)
+            page = find_last_page(csv_out)
+            write_works(fandom, writer, start_page=page)
+            logging.info('Scraping complete.')
