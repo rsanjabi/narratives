@@ -5,10 +5,10 @@
 '''
 
 import scrape.ao3_get_meta as meta
-# import scrape.ao3_get_kudos as kudos
+import scrape.ao3_get_kudos as kudos
 import config as cfg
 
 
 meta.scrape(cfg.TEST_FANDOM, from_the_top=False)
-# kudos.scrape(cfg.TEST_FANDOM, 'meta.csv', 'kudos.csv', '')
+kudos.scrape(cfg.TEST_FANDOM, from_the_top=False)
 print(f"finished scraping meta and kudos for : {cfg.TEST_FANDOM}")

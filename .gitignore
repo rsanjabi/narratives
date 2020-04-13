@@ -9,6 +9,5 @@ env/
 .venv/
 notebooks/.ipynb_checkpoints/
 notebooks/Messing Around.ipynb
-notebooks/.ipynb_checkpoints/
 Procfile
 
