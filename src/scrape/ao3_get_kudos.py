@@ -46,7 +46,7 @@ def init_path(fandom):
     os.chdir(data_path)
 
 
-def write_kudo_to_csv(work_id, writer):
+def write_kudo_to_csv(work_id, writer, logger):
     '''
     work_id is the AO3 ID of a work
     writer is a csv writer object
@@ -59,7 +59,7 @@ def write_kudo_to_csv(work_id, writer):
 
     req = requests.get(url, headers=HTTP_HEAD)
     if req.status_code != 200:
-        logging.error(f'Unable to load page for: {work_id}')
+        logger.error(f'Unable to load page for: {work_id}')
         return
 
     src = req.text
@@ -76,71 +76,114 @@ def write_kudo_to_csv(work_id, writer):
         try:
             writer.writerow(row)
         except csv.Error:
-            logging.error(f'csv.Error, skipping remaining kudos {work_id}')
+            logger.error(f'csv.Error, skipping remaining kudos {work_id}')
             return
-    logging.info(f'WORK ID: {work_id}')
+    logger.info(f'WORK ID: {work_id}')
 
 
 def find_last_work(csv_out):
     ''' Parse log file to find work_id's kudos scraped '''
 
-    with open(csv_out+'.csv', 'r') as f_log:
-        last_line = f_log.readlines()[-1]
+    with open(csv_out+'.csv', 'r') as f_file:
+        last_line = f_file.readlines()[-1]
         work_id = last_line.split()[0]
         return work_id
+
+
+def scrape_starting_at(msg='', csv_in='meta', csv_out='kudos',
+                       work='', from_the_top=False):
+
+    ''' if from_the_top = False then work should be equal to fan id. If work
+        is equal to a fan ID from_the_top should be True '''
+
+    if from_the_top:
+
+        # Set up logger
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        fh = logging.FileHandler(csv_out + '.log', mode='w')
+        formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
+                                      '%(message)s')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+
+        # Create or write over outputfile
+        with open(csv_out+'.csv', 'w') as f_out:
+            writer = csv.writer(f_out)
+
+            # First a header row
+            header = ['work_id', 'user']
+            writer.writerow(header)
+
+            # Open input file
+            with open(csv_in+'.csv', 'r') as f_in:
+                reader = csv.reader(f_in)
+                for i, row in enumerate(reader):
+                    # Skip header row
+                    if i == 0:
+                        continue
+                    write_kudo_to_csv(row[0], writer, logger)
+                    time.sleep(DELAY)
+
+    # Find out where we left off at and append
+    else:
+        # Set up logger
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        fh = logging.FileHandler(csv_out + '.log', mode='a')
+        formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
+                                      '%(message)s')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        # Open and append to output file
+        with open(csv_out+'.csv', 'a') as f_out:
+            writer = csv.writer(f_out)
+            # Open input file
+            with open(csv_in+'.csv', 'r+') as f_in:
+                reader = csv.reader(f_in)
+                encountered = False
+                for row in reader:
+                    # Write out rows again once we've encountered the work
+                    if encountered:
+                        write_kudo_to_csv(row[0], writer, logger)
+                        time.sleep(DELAY)
+                    # Is this the last work we scraped?
+                    elif row[0] == work.split(',')[0]:
+                        print(f'DEBUG 7 Encountered {row[0]} =={work}')
+                        encountered = True
+
+    logger.info('Scraping complete.')
 
 
 def scrape(fandom, csv_in='meta', csv_out='kudos', from_the_top=False):
     """ Scrape the kudos from a list of fanwork_ids """
 
     init_path(fandom)
+
+    if from_the_top:
+        scrape_starting_at(fandom, csv_in, csv_out, from_the_top=True)
+        return
+
     # check to see if the file is empty
     try:
         output_file_missing = (os.path.getsize(csv_out+'.csv') == 0)
     except OSError:
         output_file_missing = True
 
-    if from_the_top or output_file_missing:
-        logging.basicConfig(filename=csv_out+'.log',
-                            filemode='w',
-                            format='%(asctime)s-%(levelname)s-%(message)s',
-                            level=logging.INFO)
-        logging.info('Creating a new output file:'+csv_out+'.csv')
-        with open(csv_out+'.csv', 'w') as f_out:
-            writer = csv.writer(f_out)
-            header = ['work_id', 'user']
-            writer.writerow(header)
-            with open(csv_in+'.csv', 'r+') as f_in:
-                reader = csv.reader(f_in)
-                for i, row in enumerate(reader):
-                    # Skip header row
-                    if i == 0:
-                        continue
-                    write_kudo_to_csv(row[0], writer)
-                    time.sleep(DELAY)
-        logging.info('Scraping complete.')
-    else:
-        logging.basicConfig(filename=csv_out+'.log',
-                            filemode='a',
-                            format='%(asctime)s-%(levelname)s-%(message)s',
-                            level=logging.INFO)
-        try:
-            last_work = find_last_work(csv_out)
-        except Exception:
-            msg = "Can't find log file. Has fandom been scraped previously?"
-            logging.warning(msg)
-            return
-        logging.info('Append to existing file:'+csv_out+'.csv')
-        logging.info(f'Resume kudo scraping with: {last_work}')
-        with open(csv_out+'.csv', 'a') as f_out:
-            writer = csv.writer(f_out)
-            with open(csv_in+'.csv', 'r+') as f_in:
-                reader = csv.reader(f_in)
-                found = False
-                for row in reader:
-                    if found:
-                        write_kudo_to_csv(row[0], writer)
-                        time.sleep(DELAY)
-                    elif row[0] == last_work:
-                        found = True
-        logging.info('Scraping complete.')
+    if output_file_missing:
+        msg = "File not found. New file created."
+        scrape_starting_at(msg, csv_in, csv_out, from_the_top=True)
+        return
+
+    try:
+        last_work = find_last_work(csv_out)
+        msg = f"Restarting from work {last_work}"
+        print(f"DEBUG 2: {last_work}")
+        scrape_starting_at(msg, csv_in, csv_out, work=last_work,
+                           from_the_top=False)
+    except Exception as e:
+        print(f"DEBUG 3 :{e}")
+        msg = f'Undefined error: {e}. Starting from the top.'
+        return
+        # scrape_starting_at(msg, csv_in, csv_out, from_the_top=True)
+    return

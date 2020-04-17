@@ -192,19 +192,20 @@ def get_soup(base_url, i):
         raise Exception("Page not found.")
 
 
-def write_works(fandom, writer, start_page=1):
+def write_works(fandom, writer, logger, start_page=1):
     """ Write meta information for each fandom as one row in the csv. """
 
     scrape_date = datetime.datetime.now().strftime("%Y%b%d")
     base_url = 'https://archiveofourown.org/tags/'+quote(fandom)+'/works?page='
-    logging.info(f"Base url to scrape: {base_url}")
+    logger.info(f"Base url to scrape: {base_url}")
 
     try:
         soup = get_soup(base_url, start_page)
-        logging.info(f'PAGE: {start_page}')
+        logger.info(f'PAGE: {start_page}')
     except Exception:
-        logging.error(f"Unable to load {base_url+str(start_page)}")
-        logging.info(f'Logged through page: {start_page}')
+        logger.exception(f"Exception occurred:")
+        logger.error(f"Unable to load {base_url+str(start_page)}")
+        logger.info(f'Logged through page: {start_page}')
         return
 
     max_pages = int(soup.find('li', class_='next').find_previous('li').text)
@@ -220,21 +221,21 @@ def write_works(fandom, writer, start_page=1):
             except csv.Error:
                 error_msg = 'Unexpected error writing to csv: ' + \
                     start_page+[sys.exc_info()[0]]
-                logging.error(error_msg)
+                logger.error(error_msg)
         start_page += 1
         try:
             soup = get_soup(base_url, start_page)
-            logging.info(f'PAGE: {start_page}')
+            logger.info(f'PAGE: {start_page}')
         except Exception:
-            logging.error(f"Unable to load {base_url+start_page}")
+            logger.error(f"Unable to load {base_url+start_page}")
             start_page -= 1
             errors += 1
             if errors > MAX_ERRORS:
-                logging.info(f'Logged through page: {start_page}')
+                logger.info(f'Logged through page: {start_page}')
                 return
             else:
-                logging.error(f"Error attempts: {errors}")
-    logging.info(f'Logged through page: {start_page}')
+                logger.error(f"Error attempts: {errors}")
+    logger.info(f'Logged through page: {start_page}')
 
 
 def init_path(fandom):
@@ -252,41 +253,37 @@ def find_last_page(csv_out):
     ''' Parse log file to find last page scraped '''
 
     page = 1
- 
-    with open(csv_out+'.log', 'w') as f_log:
+    with open(csv_out+'.log', 'r') as f_log:
         found = False
         count = -1
         while not found:
             line = f_log.readlines()[count]
             if 'Scraping complete' in line:
-                logging.info('No new pages to scrape')
-                return
+                return -1
             if 'PAGE:' in line:
                 page = int(line.split()[2])
-                logging.debug('')
                 return page
             count -= 1
+    return -1
 
 
-def scrape(fandom, csv_out='meta', from_the_top=True):
-    """Initialize and commence scraping."""
+def scrape_starting_at(fandom, msg='', csv_out='meta', page=1,
+                       from_the_top=True):
 
-    init_path(fandom)
-    # check to see if the file is empty
-    try:
-        empty = (os.path.getsize(csv_out+'.csv') == 0)
-    except OSError:
-        empty = True
-
-    # Start from the top
-    if from_the_top or empty:
+    if from_the_top:
         with open(csv_out+'.csv', 'w') as f_out:
-            logging.basicConfig(filename=csv_out+'.log',
-                                filemode='w',
-                                format='%(asctime)s-%(levelname)s-%(message)s',
-                                level=logging.INFO)
+            logger = logging.getLogger(__name__)
+            logger.setLevel(logging.DEBUG)
+            fh = logging.FileHandler(csv_out + '.log', mode='w')
+            formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
+                                          '%(message)s')
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
+
             writer = csv.writer(f_out)
-            logging.info('Writing a header row for the csv.')
+            if msg != '':
+                logger.info(msg)
+            logger.info('Writing a header row for the csv.')
             header = ['work_id', 'title', 'author', 'gifted', 'rating',
                       'warnings', 'category', 'status', 'fandom',
                       'relationship', 'character', 'additional tags',
@@ -294,31 +291,58 @@ def scrape(fandom, csv_out='meta', from_the_top=True):
                       'collections', 'comments', 'kudos', 'bookmarks', 'hits',
                       'series_part', 'series_name', 'updated', 'scrape_date']
             writer.writerow(header)
-            write_works(fandom, writer, start_page=1)
-            logging.info('Scraping complete.')
-    # Find out where we left of at
+            write_works(fandom, writer, logger, start_page=1)
+            logger.info('Scraping complete.')
     else:
-        try:
-            page = find_last_page(csv_out)
-            msg = f"Restarting with {page}"
-            error_flag = False
-        except FileNotFoundError:
-            error_flag = True
-            msg = "Can't find log file. Has fandom been scraped previously?"
-        except IndexError:
-            error_flag = True
-            msg = "Unable to find last page to start scraping."
-        except Exception as e:
-            error_flag = True
-            msg = e
-        logging.basicConfig(filename=csv_out+'.log',
-                            filemode='a',
-                            format='%(asctime)s-%(levelname)s-%(message)s',
-                            level=logging.INFO)
-        if error_flag:
-            logging.error(msg)
-            return
         with open(csv_out+'.csv', 'a') as f_out:
+            logger = logging.getLogger(__name__)
+            logger.setLevel(logging.DEBUG)
+            fh = logging.FileHandler(csv_out + '.log', mode='a')
+            formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
+                                          '%(message)s')
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
             writer = csv.writer(f_out)
-            write_works(fandom, writer, start_page=page)
-            logging.info('Scraping complete.')
+            logger.info(f'Picking up from {page}')
+            write_works(fandom, writer, logger, start_page=page)
+            logger.info('Scraping complete.')
+
+
+def scrape(fandom, csv_out='meta', from_the_top=True):
+    """Initialize and error checking to determine what state scraping is in."""
+
+    init_path(fandom)
+    if from_the_top:
+        scrape_starting_at(fandom)
+        return
+
+    # check to see if the file is empty
+    try:
+        output_file_missing = (os.path.getsize(csv_out+'.csv') == 0)
+    except OSError:
+        output_file_missing = True
+
+    # Couldn't find output file; start from the top
+    if output_file_missing:
+        msg = "File not found. New file created."
+        scrape_starting_at(fandom, msg)
+        return
+
+    try:
+        page = find_last_page(csv_out)
+        msg = f"Restarting with {page}"
+        scrape_starting_at(fandom, msg, page=page, from_the_top=False)
+        return
+    except FileNotFoundError:
+        page = 1
+        msg = "Can't find log file. Starting from the top."
+    except IndexError:
+        msg = "Unable to find last page to start scraping. \
+               Starting from the top."
+        page = 1
+    except Exception as e:
+        msg = f'Undefined error: {e}. Starting from the top.'
+        page = 1
+
+    scrape_starting_at(fandom, msg, page=page, from_the_top=True)
+    return
