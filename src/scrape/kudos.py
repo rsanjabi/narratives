@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Scraping tool to get a list of kudos for a list of fanworks.
 
-Set config options such as the time DELAY for each http request in config.py
+Set config options such as the time cfg.DELAY for each http
+request in config.py
 
 Output is in csv format of <fandom_id>,<named_kudo_giver>
 
@@ -26,24 +27,9 @@ import os
 import csv
 import requests
 from bs4 import BeautifulSoup
-from pathvalidate import replace_symbol
+import utils.paths as paths
 import config as cfg
 import logging
-
-DELAY = cfg.DELAY
-RAW_PATH = cfg.RAW_PATH
-HTTP_HEAD = cfg.HTTP_HEADERS
-
-
-def init_path(fandom):
-    ''' Initialize data paths creating directories as needed'''
-
-    fandom_dir = replace_symbol(fandom)
-    data_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), RAW_PATH+fandom_dir)
-    if not os.path.exists(data_path):
-        os.makedirs(data_path)
-    os.chdir(data_path)
 
 
 def write_kudo_to_csv(work_id, writer, logger):
@@ -57,9 +43,10 @@ def write_kudo_to_csv(work_id, writer, logger):
 
     url = 'http://archiveofourown.org/works/'+str(work_id)+'/kudos'
 
-    req = requests.get(url, headers=HTTP_HEAD)
+    req = requests.get(url, headers=cfg.HTTP_HEADERS)
     if req.status_code != 200:
-        logger.error(f'Unable to load page for: {work_id}')
+        logger.error(f'Unable to load page for: {work_id} ',
+                     'Status_code: {req.status_code}')
         return
 
     src = req.text
@@ -81,17 +68,17 @@ def write_kudo_to_csv(work_id, writer, logger):
     logger.info(f'WORK ID: {work_id}')
 
 
-def find_last_work(csv_out):
+def find_last_work(kudos_file):
     ''' Parse log file to find work_id's kudos scraped '''
 
-    with open(csv_out+'.csv', 'r') as f_file:
+    with open(kudos_file, 'r') as f_file:
         last_line = f_file.readlines()[-1]
         work_id = last_line.split()[0]
         return work_id
 
 
-def scrape_starting_at(msg='', csv_in='meta', csv_out='kudos',
-                       work='', from_the_top=False):
+def scrape_starting_at(meta_path, kudos_path, log_path,
+                       msg='', work='', from_the_top=False):
 
     ''' if from_the_top = False then work should be equal to fan id. If work
         is equal to a fan ID from_the_top should be True '''
@@ -101,89 +88,92 @@ def scrape_starting_at(msg='', csv_in='meta', csv_out='kudos',
         # Set up logger
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.DEBUG)
-        fh = logging.FileHandler(csv_out + '.log', mode='w')
+        fh = logging.FileHandler(log_path, mode='w')
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
                                       '%(message)s')
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
         # Create or write over outputfile
-        with open(csv_out+'.csv', 'w') as f_out:
+        with open(kudos_path, 'w') as f_out:
             writer = csv.writer(f_out)
 
             # First a header row
             header = ['work_id', 'user']
             writer.writerow(header)
-
-            # Open input file
-            with open(csv_in+'.csv', 'r') as f_in:
-                reader = csv.reader(f_in)
-                for i, row in enumerate(reader):
-                    # Skip header row
-                    if i == 0:
-                        continue
-                    write_kudo_to_csv(row[0], writer, logger)
-                    time.sleep(DELAY)
+            try:
+                # Open input file
+                with open(meta_path, 'r') as f_in:
+                    reader = csv.reader(f_in)
+                    for i, row in enumerate(reader):
+                        # Skip header row
+                        if i == 0:
+                            continue
+                        write_kudo_to_csv(row[0], writer, logger)
+                        time.sleep(cfg.DELAY)
+            except FileNotFoundError as e:
+                logger.error(f"Meta file missing exception: {e}")
 
     # Find out where we left off at and append
     else:
         # Set up logger
         logger = logging.getLogger(__name__)
         logger.setLevel(logging.DEBUG)
-        fh = logging.FileHandler(csv_out + '.log', mode='a')
+        fh = logging.FileHandler(log_path, mode='a')
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
                                       '%(message)s')
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         # Open and append to output file
-        with open(csv_out+'.csv', 'a') as f_out:
+        with open(kudos_path, 'a') as f_out:
             writer = csv.writer(f_out)
             # Open input file
-            with open(csv_in+'.csv', 'r+') as f_in:
+            with open(meta_path, 'r+') as f_in:
                 reader = csv.reader(f_in)
                 encountered = False
                 for row in reader:
                     # Write out rows again once we've encountered the work
                     if encountered:
                         write_kudo_to_csv(row[0], writer, logger)
-                        time.sleep(DELAY)
+                        time.sleep(cfg.DELAY)
                     # Is this the last work we scraped?
                     elif row[0] == work.split(',')[0]:
-                        print(f'DEBUG 7 Encountered {row[0]} =={work}')
                         encountered = True
 
     logger.info('Scraping complete.')
 
 
-def scrape(fandom, csv_in='meta', csv_out='kudos', from_the_top=False):
+def scrape(fandom, from_the_top=False):
     """ Scrape the kudos from a list of fanwork_ids """
 
-    init_path(fandom)
+    meta_path = paths.meta_path(fandom)
+    log_path = paths.kudo_log_path(fandom)
+    kudos_path = paths.kudo_path(fandom)
 
     if from_the_top:
-        scrape_starting_at(fandom, csv_in, csv_out, from_the_top=True)
+        scrape_starting_at(meta_path, kudos_path, log_path,
+                           msg=fandom, from_the_top=True)
         return
 
     # check to see if the file is empty
     try:
-        output_file_missing = (os.path.getsize(csv_out+'.csv') == 0)
+        output_file_missing = (os.path.getsize(kudos_path) == 0)
     except OSError:
         output_file_missing = True
 
     if output_file_missing:
         msg = "File not found. New file created."
-        scrape_starting_at(msg, csv_in, csv_out, from_the_top=True)
+        scrape_starting_at(meta_path, kudos_path, log_path,
+                           msg=msg, from_the_top=True)
         return
 
     try:
-        last_work = find_last_work(csv_out)
+        last_work = find_last_work(kudos_path)
         msg = f"Restarting from work {last_work}"
-        print(f"DEBUG 2: {last_work}")
-        scrape_starting_at(msg, csv_in, csv_out, work=last_work,
+        scrape_starting_at(meta_path, kudos_path, log_path,
+                           msg=msg, work=last_work,
                            from_the_top=False)
     except Exception as e:
-        print(f"DEBUG 3 :{e}")
         msg = f'Undefined error: {e}. Starting from the top.'
         return
-        # scrape_starting_at(msg, csv_in, csv_out, from_the_top=True)
     return
