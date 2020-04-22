@@ -4,10 +4,10 @@
     Airflow in the future.
 '''
 
-import scrape.meta as meta
+# import scrape.meta as meta
 import scrape.kudos as kudos
 import config as cfg
 
-meta.scrape(cfg.TEST_FANDOM, from_the_top=False)
-kudos.scrape(cfg.TEST_FANDOM, from_the_top=False)
+# meta.scrape(cfg.TEST_FANDOM, from_the_top=True)
+kudos.scrape(cfg.TEST_FANDOM, from_the_top=True)
 print(f"finished scraping meta and kudos for : {cfg.TEST_FANDOM}")

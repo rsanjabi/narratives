@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Scraping tool to get meta information from a given fandom.
 
-Set config options such as the time delay for each http request in config.py
+Set config options such as the time cfg.DELAY for each http request
+in config.py
 
 Output is in csv format:
         header = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
@@ -15,7 +16,7 @@ Example URL to be scraped:
 
 Example:
 
-    scrap.ao3_get_kudos(fandom, csv_out='meta', from_the_top=True)
+    scrap.kudos(fandom, from_the_top=True)
 
 TODO:
 
@@ -29,16 +30,10 @@ import sys
 from urllib.parse import quote
 import requests
 from bs4 import BeautifulSoup
-from pathvalidate import replace_symbol
 from unidecode import unidecode
+import utils.paths as paths
 import config as cfg
 import logging
-
-
-DELAY = cfg.DELAY
-RAW_PATH = cfg.RAW_PATH
-HTTP_HEAD = cfg.HTTP_HEADERS
-MAX_ERRORS = cfg.MAX_ERRORS
 
 
 def get_tag_info(category, meta):
@@ -183,7 +178,7 @@ def get_soup(base_url, i):
     """ Scrape the page, returning success and soup."""
 
     cur_url = base_url+str(i)
-    req = requests.get(cur_url, headers=HTTP_HEAD)
+    req = requests.get(cur_url, headers=cfg.HTTP_HEADERS)
     if req.status_code == 200:
         src = req.text
         soup = BeautifulSoup(src, 'html.parser')
@@ -208,11 +203,16 @@ def write_works(fandom, writer, logger, start_page=1):
         logger.info(f'Logged through page: {start_page}')
         return
 
-    max_pages = int(soup.find('li', class_='next').find_previous('li').text)
+    try:
+        next_element = soup.find('li', class_='next')
+        max_pages = int(next_element.find_previous('li').text)
+    except AttributeError:
+        max_pages = 1
+
     errors = 0
 
     while start_page < max_pages+1:
-        time.sleep(DELAY)
+        time.sleep(cfg.DELAY)
         works = soup.find_all(class_="work blurb group")
         for work in works:
             row = scrape_work(work, scrape_date)
@@ -227,33 +227,25 @@ def write_works(fandom, writer, logger, start_page=1):
             soup = get_soup(base_url, start_page)
             logger.info(f'PAGE: {start_page}')
         except Exception:
-            logger.error(f"Unable to load {base_url+start_page}")
+            logger.error(f"Unable to load {base_url+str(start_page)}")
             start_page -= 1
             errors += 1
-            if errors > MAX_ERRORS:
-                logger.info(f'Logged through page: {start_page}')
+            if errors > cfg.MAX_ERRORS:
+                err = f'Max errors ({cfg.MAX_ERRORS}) reached.'
+                err2 = f' Logged through page: {start_page}'
+                logger.info(err+err2)
                 return
             else:
-                logger.error(f"Error attempts: {errors}")
+                time.delay(20*cfg.DELAY)
+                logger.error(f"Error attempts: {errors} of {cfg.MAX_ERRORS}")
     logger.info(f'Logged through page: {start_page}')
 
 
-def init_path(fandom):
-    ''' Initialize data paths creating directories as needed'''
-
-    fandom_dir = replace_symbol(fandom)
-    data_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), RAW_PATH+fandom_dir)
-    if not os.path.exists(data_path):
-        os.makedirs(data_path)
-    os.chdir(data_path)
-
-
-def find_last_page(csv_out):
+def find_last_page(log_path):
     ''' Parse log file to find last page scraped '''
 
     page = 1
-    with open(csv_out+'.log', 'r') as f_log:
+    with open(log_path, 'r') as f_log:
         found = False
         count = -1
         while not found:
@@ -267,14 +259,14 @@ def find_last_page(csv_out):
     return -1
 
 
-def scrape_starting_at(fandom, msg='', csv_out='meta', page=1,
-                       from_the_top=True):
+def scrape_starting_at(fandom, meta_path, log_path, msg='',
+                       page=1, from_the_top=True):
 
     if from_the_top:
-        with open(csv_out+'.csv', 'w') as f_out:
+        with open(meta_path, 'w') as f_out:
             logger = logging.getLogger(__name__)
             logger.setLevel(logging.DEBUG)
-            fh = logging.FileHandler(csv_out + '.log', mode='w')
+            fh = logging.FileHandler(log_path, mode='w')
             formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
                                           '%(message)s')
             fh.setFormatter(formatter)
@@ -294,10 +286,10 @@ def scrape_starting_at(fandom, msg='', csv_out='meta', page=1,
             write_works(fandom, writer, logger, start_page=1)
             logger.info('Scraping complete.')
     else:
-        with open(csv_out+'.csv', 'a') as f_out:
+        with open(meta_path, 'a') as f_out:
             logger = logging.getLogger(__name__)
             logger.setLevel(logging.DEBUG)
-            fh = logging.FileHandler(csv_out + '.log', mode='a')
+            fh = logging.FileHandler(log_path, mode='a')
             formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
                                           '%(message)s')
             fh.setFormatter(formatter)
@@ -308,30 +300,33 @@ def scrape_starting_at(fandom, msg='', csv_out='meta', page=1,
             logger.info('Scraping complete.')
 
 
-def scrape(fandom, csv_out='meta', from_the_top=True):
+def scrape(fandom, from_the_top=True):
     """Initialize and error checking to determine what state scraping is in."""
 
-    init_path(fandom)
+    meta_path = paths.meta_path(fandom)
+    log_path = paths.meta_log_path(fandom)
+
     if from_the_top:
-        scrape_starting_at(fandom)
+        scrape_starting_at(fandom, meta_path, log_path)
         return
 
     # check to see if the file is empty
     try:
-        output_file_missing = (os.path.getsize(csv_out+'.csv') == 0)
+        output_file_missing = (os.path.getsize(meta_path) == 0)
     except OSError:
         output_file_missing = True
 
     # Couldn't find output file; start from the top
     if output_file_missing:
         msg = "File not found. New file created."
-        scrape_starting_at(fandom, msg)
+        scrape_starting_at(fandom, meta_path, log_path, msg)
         return
 
     try:
-        page = find_last_page(csv_out)
+        page = find_last_page(log_path)
         msg = f"Restarting with {page}"
-        scrape_starting_at(fandom, msg, page=page, from_the_top=False)
+        scrape_starting_at(fandom, meta_path, log_path, msg,
+                           page=page, from_the_top=False)
         return
     except FileNotFoundError:
         page = 1
@@ -344,5 +339,6 @@ def scrape(fandom, csv_out='meta', from_the_top=True):
         msg = f'Undefined error: {e}. Starting from the top.'
         page = 1
 
-    scrape_starting_at(fandom, msg, page=page, from_the_top=True)
+    scrape_starting_at(fandom, meta_path, log_path, msg,
+                       page=page, from_the_top=True)
     return

@@ -45,9 +45,10 @@ def write_kudo_to_csv(work_id, writer, logger):
 
     req = requests.get(url, headers=cfg.HTTP_HEADERS)
     if req.status_code != 200:
-        logger.error(f'Unable to load page for: {work_id} ',
-                     'Status_code: {req.status_code}')
-        return
+        msg1 = f"Unable to load page for word: {work_id} "
+        msg2 = f'HTTP status code: {req.status_code}'
+        logger.error(msg1 + msg2)
+        return 1
 
     src = req.text
     soup = BeautifulSoup(src, 'html.parser')
@@ -64,8 +65,9 @@ def write_kudo_to_csv(work_id, writer, logger):
             writer.writerow(row)
         except csv.Error:
             logger.error(f'csv.Error, skipping remaining kudos {work_id}')
-            return
-    logger.info(f'WORK ID: {work_id}')
+            return 1
+    logger.info(f'Scraped {len(kudo_list)} kudos for ID: {work_id}')
+    return 0
 
 
 def find_last_work(kudos_file):
@@ -82,6 +84,7 @@ def scrape_starting_at(meta_path, kudos_path, log_path,
 
     ''' if from_the_top = False then work should be equal to fan id. If work
         is equal to a fan ID from_the_top should be True '''
+    errors = 0
 
     if from_the_top:
 
@@ -109,7 +112,10 @@ def scrape_starting_at(meta_path, kudos_path, log_path,
                         # Skip header row
                         if i == 0:
                             continue
-                        write_kudo_to_csv(row[0], writer, logger)
+                        errors += write_kudo_to_csv(row[0], writer, logger)
+                        if errors > cfg.MAX_ERRORS:
+                            logger.error(f"Exceeded max page loading errors.")
+                            break
                         time.sleep(cfg.DELAY)
             except FileNotFoundError as e:
                 logger.error(f"Meta file missing exception: {e}")
@@ -134,7 +140,10 @@ def scrape_starting_at(meta_path, kudos_path, log_path,
                 for row in reader:
                     # Write out rows again once we've encountered the work
                     if encountered:
-                        write_kudo_to_csv(row[0], writer, logger)
+                        errors += write_kudo_to_csv(row[0], writer, logger)
+                        if errors > cfg.MAX_ERRORS:
+                            logger.error(f"Exceeded max page loading errors.")
+                            break
                         time.sleep(cfg.DELAY)
                     # Is this the last work we scraped?
                     elif row[0] == work.split(',')[0]:
