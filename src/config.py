@@ -2,18 +2,20 @@
 """ Module-wide constants"""
 
 # Wait time between AO3 requests in seconds
-DELAY = 4
-
-# File name of output file
-OUTPUT_FILE = 'work_id_list.txt'
+DELAY = 5
 
 # Location of raw data dumps. Fandom subdirectories will be located here
 DATA_PATH = '../data/raw/'
+MODEL_PATH = '../models/'
 
+INDICES_PREFIX = 'indices'
+MODEL_PREFIX = 'implicit'
 KUDO_PREFIX = 'kudos'
 META_PREFIX = 'meta'
+
 LOG_SUFFIX = '.log'
 DATA_SUFFIX = '.csv'
+PICKLE_SUFFIX = '.pkl'
 
 # HTTP Request Headers
 HTTP_HEADERS = {'User-Agent':
@@ -28,7 +30,7 @@ HTTP_HEADERS = {'User-Agent':
 # TEST_FANDOM = 'Star Wars Original Trilogy'
 # TEST_FANDOM = 'Rogue One: A Star Wars Story (2016)'
 # TEST_FANDOM = 'Star Wars: Rebels'
-TEST_FANDOM = 'Star Wars: Resistance (Cartoon)'
+# TEST_FANDOM = 'Star Wars: Resistance (Cartoon)'
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3

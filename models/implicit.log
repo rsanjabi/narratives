@@ -1,0 +1,6 @@
+2020-04-22 21:18:19,549-INFO-Reading in kudos.
+2020-04-22 21:18:19,561-INFO-Creating empty matrix.
+2020-04-22 21:18:19,928-INFO- completed size: (3472, 19331)
+2020-04-22 21:18:19,928-INFO-Training model
+2020-04-22 21:18:27,697-INFO-Storing model for late inference.
+2020-04-22 21:18:27,763-INFO-Model building and features engineering complete.

@@ -36,6 +36,41 @@ def meta_log_path(fandom):
     return path.joinpath(cfg.META_PREFIX + cfg.LOG_SUFFIX)
 
 
+def matrix_log_path():
+    path = Path() / cfg.DATA_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath(cfg.META_PREFIX + cfg.LOG_SUFFIX)
+
+
+def model_log_path():
+    path = Path() / cfg.MODEL_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath(cfg.MODEL_PREFIX+cfg.LOG_SUFFIX)
+
+
+def pickle_path():
+    path = Path() / cfg.MODEL_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath(cfg.MODEL_PREFIX+cfg.PICKLE_SUFFIX)
+
+
+def inidices_path():
+    path = Path() / cfg.MODEL_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath(cfg.INDICES_PREFIX+cfg.PICKLE_SUFFIX)
+
+
+def lookup_table_path():
+    path = Path() / cfg.MODEL_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath(cfg.META_PREFIX+cfg.DATA_SUFFIX)
+
+
 def init_fan_path(fandom):
     ''' Initialize data paths creating directories as needed'''
 
