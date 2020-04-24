@@ -22,15 +22,18 @@ HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
 # When testing a single fandom
-# TEST_FANDOM = 'Star Wars: The Clone Wars (2008) - All Media Types'
-# TEST_FANDOM = 'The Mandalorian (TV)'
-# TEST_FANDOM = 'Star Wars: A New Dawn - John Jackson Miller'
-# TEST_FANDOM = 'Star Wars: Kanan (Comics)'
-# TEST_FANDOM = 'Star Wars: Thrawn Series - Timothy Zahn (2017)'
-# TEST_FANDOM = 'Star Wars Original Trilogy'
-# TEST_FANDOM = 'Rogue One: A Star Wars Story (2016)'
-# TEST_FANDOM = 'Star Wars: Rebels'
-# TEST_FANDOM = 'Star Wars: Resistance (Cartoon)'
+TEST_FANDOM = 'The Mandalorian (TV)'
+TEST_FANDOM_LIST = ['The Mandalorian (TV)',
+                    'Star Wars: A New Dawn - John Jackson Miller',
+                    'Star Wars: Kanan (Comics)', 
+                    'Star Wars: Thrawn Series - Timothy Zahn (2017)', 
+                    'Star Wars Original Trilogy', 
+                    'Rogue One: A Star Wars Story (2016)', 
+                    'Star Wars: Rebels',
+                    'Star Wars: Resistance (Cartoon)', 
+                    'Star Wars: The Clone Wars (2008) - All Media Types',
+                    'Solo: A Star Wars Story (2018)'
+                    ]
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3
