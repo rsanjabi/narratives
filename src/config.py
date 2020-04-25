@@ -21,6 +21,8 @@ PICKLE_SUFFIX = '.pkl'
 HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
+# DELETE ME
+
 # When testing a single fandom
 TEST_FANDOM = 'The Mandalorian (TV)'
 TEST_FANDOM_LIST = ['The Mandalorian (TV)',
