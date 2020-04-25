@@ -79,7 +79,7 @@ def find_last_work(kudos_file):
         return work_id
 
 
-def scrape_starting_at(meta_path, kudos_path, log_path,
+def scrape_starting_at(fandom, meta_path, kudos_path, log_path,
                        msg='', work='', from_the_top=False):
 
     ''' if from_the_top = False then work should be equal to fan id. If work
@@ -89,7 +89,7 @@ def scrape_starting_at(meta_path, kudos_path, log_path,
     if from_the_top:
 
         # Set up logger
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger(fandom+'kudos')
         logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler(log_path, mode='w')
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
@@ -123,7 +123,7 @@ def scrape_starting_at(meta_path, kudos_path, log_path,
     # Find out where we left off at and append
     else:
         # Set up logger
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger(fandom+'kudos')
         logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler(log_path, mode='a')
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
@@ -160,7 +160,7 @@ def scrape(fandom, from_the_top=False):
     kudos_path = paths.kudo_path(fandom)
 
     if from_the_top:
-        scrape_starting_at(meta_path, kudos_path, log_path,
+        scrape_starting_at(fandom, meta_path, kudos_path, log_path,
                            msg=fandom, from_the_top=True)
         return
 
@@ -172,14 +172,14 @@ def scrape(fandom, from_the_top=False):
 
     if output_file_missing:
         msg = "File not found. New file created."
-        scrape_starting_at(meta_path, kudos_path, log_path,
+        scrape_starting_at(fandom, meta_path, kudos_path, log_path,
                            msg=msg, from_the_top=True)
         return
 
     try:
         last_work = find_last_work(kudos_path)
         msg = f"Restarting from work {last_work}"
-        scrape_starting_at(meta_path, kudos_path, log_path,
+        scrape_starting_at(fandom, meta_path, kudos_path, log_path,
                            msg=msg, work=last_work,
                            from_the_top=False)
     except Exception as e:

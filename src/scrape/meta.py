@@ -19,6 +19,7 @@ Example:
     scrap.kudos(fandom, from_the_top=True)
 
 TODO:
+    * Need to add proper logging functionality and from_the_top=False accurately
 
 """
 
@@ -264,7 +265,7 @@ def scrape_starting_at(fandom, meta_path, log_path, msg='',
 
     if from_the_top:
         with open(meta_path, 'w') as f_out:
-            logger = logging.getLogger(__name__)
+            logger = logging.getLogger(fandom+'meta')
             logger.setLevel(logging.DEBUG)
             fh = logging.FileHandler(log_path, mode='w')
             formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
@@ -285,9 +286,10 @@ def scrape_starting_at(fandom, meta_path, log_path, msg='',
             writer.writerow(header)
             write_works(fandom, writer, logger, start_page=1)
             logger.info('Scraping complete.')
+            fh.close()
     else:
         with open(meta_path, 'a') as f_out:
-            logger = logging.getLogger(__name__)
+            logger = logging.getLogger(fandom+'meta')
             logger.setLevel(logging.DEBUG)
             fh = logging.FileHandler(log_path, mode='a')
             formatter = logging.Formatter('%(asctime)s-%(levelname)s-' +
@@ -298,6 +300,7 @@ def scrape_starting_at(fandom, meta_path, log_path, msg='',
             logger.info(f'Picking up from {page}')
             write_works(fandom, writer, logger, start_page=page)
             logger.info('Scraping complete.')
+            fh.close()
 
 
 def scrape(fandom, from_the_top=True):
@@ -324,6 +327,10 @@ def scrape(fandom, from_the_top=True):
 
     try:
         page = find_last_page(log_path)
+        # Need to add proper logging functionality
+        if page == -1:
+            print(f"Scraping already complete.")
+            return
         msg = f"Restarting with {page}"
         scrape_starting_at(fandom, meta_path, log_path, msg,
                            page=page, from_the_top=False)

@@ -25,14 +25,10 @@ HTTP_HEADERS = {'User-Agent':
 TEST_FANDOM = 'The Mandalorian (TV)'
 TEST_FANDOM_LIST = ['The Mandalorian (TV)',
                     'Star Wars: A New Dawn - John Jackson Miller',
-                    'Star Wars: Kanan (Comics)', 
-                    'Star Wars: Thrawn Series - Timothy Zahn (2017)', 
-                    'Star Wars Original Trilogy', 
-                    'Rogue One: A Star Wars Story (2016)', 
-                    'Star Wars: Rebels',
-                    'Star Wars: Resistance (Cartoon)', 
-                    'Star Wars: The Clone Wars (2008) - All Media Types',
-                    'Solo: A Star Wars Story (2018)'
+                    'Star Wars: Kanan (Comics)',
+                    'Star Wars: Thrawn Series - Timothy Zahn (2017)',
+                    'Star Wars Original Trilogy',
+                    'Star Wars: The Clone Wars (2008) - All Media Types'
                     ]
 
 # How many attempts at requesting page before quitting

@@ -9,6 +9,7 @@ import scrape.kudos as kudos
 import config as cfg
 
 for fandom in cfg.TEST_FANDOM_LIST:
+    print(f"Starting to scrape: {fandom}")
     try:
         meta.scrape(fandom, from_the_top=False)
         kudos.scrape(fandom, from_the_top=False)

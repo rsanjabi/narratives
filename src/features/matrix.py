@@ -8,6 +8,7 @@ from implicit.bpr import BayesianPersonalizedRanking as bpr_rec
 import utils.paths as paths
 import logging
 import pickle
+import config as cfg
 
 '''
     Matrx.py takes fandom names and creates a sparse matrix of users who have
@@ -42,15 +43,13 @@ def create_path_list():
     fandom1 = 'Star Wars: Rebels'
     fandom2 = 'Star Wars: The Clone Wars (2008) - All Media Types'
 
-    kudo1 = paths.kudo_path(fandom1)
-    kudo2 = paths.kudo_path(fandom2)
+    cfg.TEST_FANDOM_LIST
+    kudo_files = []
+    meta_files = []
 
-    meta1 = paths.meta_path(fandom1)
-    meta2 = paths.meta_path(fandom2)
-
-    # Will need this to read the files
-    kudo_files = [kudo1, kudo2]
-    meta_files = [meta1, meta2]
+    for fandom in cfg.TEST_FANDOM_LIST:
+        kudo_files.append(paths.kudo_path(fandom))
+        meta_files.append(paths.meta_path(fandom))
 
     return kudo_files, meta_files
 
