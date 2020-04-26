@@ -3,6 +3,8 @@ bs4==0.0.1
 certifi==2019.11.28
 chardet==3.0.4
 Click==7.0
+entrypoints==0.3
+flake8==3.7.9
 Flask==1.1.1
 gunicorn==20.0.4
 idna==2.9
@@ -10,9 +12,13 @@ implicit==0.4.2
 itsdangerous==1.1.0
 Jinja2==2.11.1
 MarkupSafe==1.1.1
+mccabe==0.6.1
+-e git+https://github.com/rsanjabi/narratives.git@026ef98a190d898186ef01100efd365c1a66f986#egg=narratives&subdirectory=src
 numpy==1.18.1
 pandas==1.0.1
 pathvalidate==2.2.0
+pycodestyle==2.5.0
+pyflakes==2.1.1
 python-dateutil==2.8.1
 pytz==2019.3
 requests==2.23.0
@@ -23,5 +29,3 @@ tqdm==4.43.0
 Unidecode==1.1.1
 urllib3==1.25.8
 Werkzeug==1.0.0
-
--e ./src
