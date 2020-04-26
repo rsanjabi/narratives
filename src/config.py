@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """ Module-wide constants"""
 
+
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+
 # Wait time between AO3 requests in seconds
 DELAY = 5
 
