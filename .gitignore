@@ -1,13 +1,41 @@
-# Local development noodlings
-dump/
-data/
-docs/
+# Dev Tools
 .vscode
-__pycache__/
-.DS_Store
-env/
-.venv/
+
+# Distribution / packaging
+*.egg-info/
+
+# Dev doc notes and notebooks
+dump/
+docs/
 notebooks/.ipynb_checkpoints/
 notebooks/Messing Around.ipynb
+
+# Too big
+data/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Mac/OSX
+.DS_Store
+
+# Environments
+env/
+.venv/
+
+# Heroku
 Procfile
+
+# Unit test / coverage reports - customize
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
 
