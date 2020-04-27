@@ -19,7 +19,8 @@ Example:
     scrap.kudos(fandom, from_the_top=True)
 
 TODO:
-    * Need to add proper logging functionality and from_the_top=False accurately
+    * Need to add proper logging functionality and 
+        from_the_top=False accurately
 
 """
 

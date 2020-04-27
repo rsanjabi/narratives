@@ -40,8 +40,6 @@ def create_logger():
 
 def create_path_list():
     # Create paths for each fandom
-    fandom1 = 'Star Wars: Rebels'
-    fandom2 = 'Star Wars: The Clone Wars (2008) - All Media Types'
 
     cfg.TEST_FANDOM_LIST
     kudo_files = []
