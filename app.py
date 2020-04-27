@@ -96,7 +96,8 @@ def predict():
 @app.route('/<work_id>', methods=['POST'])
 def predict_again(work_id):
     # make generator pickup where it left off at
-    # temp = return_template('index.html', work_id=work_id) # forgot how this works
+    # temp = return_template('index.html', work_id=work_id)
+    # # forgot what return_template should be
     temp = 0
     return temp
 
