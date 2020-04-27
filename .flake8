@@ -1,2 +1,2 @@
 [flake8]
-exclude = __pycache__, .vscode, data, docs, dump, env, models, notebooks
+exclude = __pycache__, .vscode, data, docs, dump, env, models, notebooks, venv
