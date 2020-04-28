@@ -38,5 +38,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+
+# type checking support files
 .mypy_cache/
 
