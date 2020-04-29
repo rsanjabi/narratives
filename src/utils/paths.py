@@ -3,7 +3,7 @@ from pathlib import Path
 import config as cfg
 
 
-def kudo_log_path(fandom: str) -> Path:
+def kudo_log_path(fandom: str) -> object:
 
     fandom_dir = replace_symbol(fandom)
     path = Path() / cfg.DATA_PATH / fandom_dir

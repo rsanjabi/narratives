@@ -26,7 +26,6 @@ from logging import Logger
 import numpy as np
 import scipy.sparse as sp
 import pandas as pd
-# from pandas import Dataframe
 from implicit.bpr import BayesianPersonalizedRanking as bpr_rec
 
 import utils.paths as paths
