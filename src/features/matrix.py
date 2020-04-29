@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-
-import numpy as np
-import csv
-import scipy.sparse as sp
-import pandas as pd
-from implicit.bpr import BayesianPersonalizedRanking as bpr_rec
-import utils.paths as paths
-import logging
-import pickle
-import config as cfg
-
 '''
     Matrx.py takes fandom names and creates a sparse matrix of users who have
     given a fanwork kudos.
@@ -26,8 +15,25 @@ import config as cfg
             folders?)
 '''
 
+import csv
+import pickle
+from typing import List, Tuple, Dict, Any
+from pathlib import Path
 
-def create_logger():
+import logging
+from logging import Logger
+
+import numpy as np
+import scipy.sparse as sp
+import pandas as pd
+# from pandas import Dataframe
+from implicit.bpr import BayesianPersonalizedRanking as bpr_rec
+
+import utils.paths as paths
+import config as cfg
+
+
+def create_logger() -> Logger:
     # Logger
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
@@ -38,7 +44,7 @@ def create_logger():
     return logger
 
 
-def create_path_list():
+def create_path_list() -> Tuple[List[Path], List[Path]]:
     # Create paths for each fandom
 
     cfg.TEST_FANDOM_LIST
@@ -52,7 +58,7 @@ def create_path_list():
     return kudo_files, meta_files
 
 
-def create_megaframe(kudo_files):
+def create_megaframe(kudo_files: List[Path]) -> pd.Dataframe:
     # Create mega dataframe
 
     frames = []
@@ -62,7 +68,7 @@ def create_megaframe(kudo_files):
     return df
 
 
-def create_empty_df(df):
+def create_empty_df(df: pd.Dataframe) -> np.ndarray:
     # Determine unique work and user sizes to make emtpy DF
     num_works = len(df['work_id'].unique())
     num_users = len(df['user'].unique())
@@ -70,18 +76,19 @@ def create_empty_df(df):
     return data
 
 
-def invert_indices(indices):
+def invert_indices(indices: Dict[str, Any]) -> Dict[str, Any]:
     # create inverted indices for reverse lookup
-    inverted_indices = {'work_id': {}, 'user': {}}
+    inverted_indices: Dict[str, Any] = {'work_id': {}, 'user': {}}
     inverted_indices['work_id'] = {v: k for k, v in indices['work_id'].items()}
     inverted_indices['user'] = {v: k for k, v in indices['user'].items()}
 
     return inverted_indices
 
 
-def create_sparse_matrix(data, kudo_files):
+def create_sparse_matrix(data: np.ndarray,
+                         kudo_files) -> Tuple[np.ndarray, Dict[Any, Any]]:
     # create indices for work_id and users
-    indices = {'work_id': {}, 'user': {}}
+    indices: Dict[str, Any] = {'work_id': {}, 'user': {}}
 
     # then go through each line of csv files for values to set to 1
     for fandom in kudo_files:
@@ -95,7 +102,9 @@ def create_sparse_matrix(data, kudo_files):
     return data, indices
 
 
-def test_predictions(indices, inverted_indices, id):
+def test_predictions(indices: Dict[Any, Any],
+                     inverted_indices: Dict[Any, Any],
+                     id: int) -> None:
     work_indice = indices['work_id'][id]
     num_to_return = 20
 
@@ -106,7 +115,9 @@ def test_predictions(indices, inverted_indices, id):
         print(f"http://www.archiveofourown.org/works/{work_id}")
 
 
-def store_data(model, indices, meta_df):
+def store_data(model: bpr_rec,
+               indices: Dict[Any, Any],
+               meta_df: pd.Dataframe) -> None:
     # Write out model and indices dictionary as pkl files
     # Write out lookup_table/meta_df as csv file
     # All three will be used for infererncing

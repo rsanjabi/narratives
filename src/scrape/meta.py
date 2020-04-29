@@ -37,6 +37,7 @@ from urllib.parse import quote
 import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
+from pathlib import Path
 
 import utils.paths as paths
 import config as cfg
@@ -248,7 +249,7 @@ def write_works(fandom: str, writer: Any,
     logger.info(f'Logged through page: {start_page}')
 
 
-def find_last_page(log_path):
+def find_last_page(log_path: Path) -> int:
     ''' Parse log file to find last page scraped '''
 
     page = 1
@@ -266,8 +267,9 @@ def find_last_page(log_path):
     return -1
 
 
-def scrape_starting_at(fandom, meta_path, log_path, msg='',
-                       page=1, from_the_top=True):
+def scrape_starting_at(fandom: str, meta_path: Path, log_path: Path,
+                       msg: str = '', page: int = 1,
+                       from_the_top: bool = True):
 
     if from_the_top:
         with open(meta_path, 'w') as f_out:
@@ -309,7 +311,7 @@ def scrape_starting_at(fandom, meta_path, log_path, msg='',
             fh.close()
 
 
-def scrape(fandom, from_the_top=True):
+def scrape(fandom: str, from_the_top: bool = True):
     """Initialize and error checking to determine what state scraping is in."""
 
     meta_path = paths.meta_path(fandom)
