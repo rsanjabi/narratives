@@ -40,6 +40,13 @@ jobs:
             . venv/bin/activate
             mypy -p src
 
+      - run:
+          name: run unit tests
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            python -m unittest discover -s tests/unit
+
       #- run:
       #   name: run tests
       #   command: |

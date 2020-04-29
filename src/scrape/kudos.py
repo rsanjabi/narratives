@@ -26,13 +26,18 @@ import time
 import os
 import csv
 import requests
+from typing import Any
+from pathlib import Path
+
 from bs4 import BeautifulSoup
+import logging
+from logging import Logger
+
 import utils.paths as paths
 import config as cfg
-import logging
 
 
-def write_kudo_to_csv(work_id, writer, logger):
+def write_kudo_to_csv(work_id: str, writer: Any, logger: Logger) -> int:
     '''
     work_id is the AO3 ID of a work
     writer is a csv writer object
@@ -41,7 +46,7 @@ def write_kudo_to_csv(work_id, writer, logger):
     header_info should be the header info to encourage ethical scraping.
     '''
 
-    url = 'http://archiveofourown.org/works/'+str(work_id)+'/kudos'
+    url = 'http://archiveofourown.org/works/'+work_id+'/kudos'
 
     req = requests.get(url, headers=cfg.HTTP_HEADERS)
     if req.status_code != 200:
@@ -70,7 +75,7 @@ def write_kudo_to_csv(work_id, writer, logger):
     return 0
 
 
-def find_last_work(kudos_file):
+def find_last_work(kudos_file: Path) -> str:
     ''' Parse log file to find work_id's kudos scraped '''
 
     with open(kudos_file, 'r') as f_file:
@@ -79,9 +84,9 @@ def find_last_work(kudos_file):
         return work_id
 
 
-def scrape_starting_at(fandom, meta_path, kudos_path, log_path,
-                       msg='', work='', from_the_top=False):
-
+def scrape_starting_at(fandom: str, meta_path: Path, kudos_path: Path,
+                       log_path: Path, msg: str = '', work: str = '',
+                       from_the_top: bool = False):
     ''' if from_the_top = False then work should be equal to fan id. If work
         is equal to a fan ID from_the_top should be True '''
     errors = 0
@@ -152,7 +157,7 @@ def scrape_starting_at(fandom, meta_path, kudos_path, log_path,
     logger.info('Scraping complete.')
 
 
-def scrape(fandom, from_the_top=False):
+def scrape(fandom: str, from_the_top: bool = False) -> None:
     """ Scrape the kudos from a list of fanwork_ids """
 
     meta_path = paths.meta_path(fandom)

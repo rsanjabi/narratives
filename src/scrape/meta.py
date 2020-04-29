@@ -29,25 +29,30 @@ import datetime
 import os
 import csv
 import sys
+from typing import List, Any
+import logging
+from logging import Logger
+
 from urllib.parse import quote
 import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
+from pathlib import Path
+
 import utils.paths as paths
 import config as cfg
-import logging
 
 
-def get_tag_info(category, meta):
+def get_tag_info(category: str, meta: BeautifulSoup) -> List[str]:
     """ Find relationships, characters, and freeforms tags."""
     try:
-        tag_list = meta.find_all("li", class_=str(category))
+        tag_list = meta.find_all("li", class_=category)
     except AttributeError:
         return []
     return [unidecode(result.text) for result in tag_list]
 
 
-def get_stats(work):
+def get_stats(work: BeautifulSoup) -> List[str]:
     """
     Find stats (language, published, status, date status, words, chapters,
     comments, kudos, bookmarks, hits
@@ -65,21 +70,21 @@ def get_stats(work):
     return stats
 
 
-def get_tags(meta):
+def get_tags(meta: BeautifulSoup) -> Any:
     """Find relationships, characters, and freeforms tags"""
 
     tags = ['relationships', 'characters', 'freeforms']
     return list(map(lambda tag: get_tag_info(tag, meta), tags))
 
 
-def get_required_tags(work):
+def get_required_tags(work: BeautifulSoup) -> List[str]:
     """Finds required tags."""
 
     req_tags = work.find(class_='required-tags').find_all('a')
     return [x.text for x in req_tags]
 
 
-def get_header(work):
+def get_header(work: BeautifulSoup) -> List[str]:
     """Finds header information (work_id, title, author, gifted to user)."""
 
     result = work.find('h4', class_='heading').find_all('a')
@@ -112,7 +117,7 @@ def get_header(work):
     return [work_id, title, auth, gift]
 
 
-def get_fandoms(work):
+def get_fandoms(work: BeautifulSoup) -> List[str]:
     """ Find the list of fandoms."""
 
     fandoms = ''
@@ -126,7 +131,7 @@ def get_fandoms(work):
     return [fandoms]
 
 
-def get_summary(work):
+def get_summary(work: BeautifulSoup) -> List[str]:
     """ Find summary description and return as list of strings. """
 
     try:
@@ -137,7 +142,7 @@ def get_summary(work):
     return [summary]
 
 
-def get_updated(work):
+def get_updated(work: BeautifulSoup) -> List[str]:
     """ Find update date. Return as list of strings. """
 
     try:
@@ -147,7 +152,7 @@ def get_updated(work):
     return [date]
 
 
-def get_series(work):
+def get_series(work: BeautifulSoup) -> List[str]:
     """ Find series info and return as list. """
 
     try:
@@ -159,7 +164,7 @@ def get_series(work):
     return [part, s_name]
 
 
-def scrape_work(work, scrape_date):
+def scrape_work(work: BeautifulSoup, scrape_date: str) -> List[str]:
     """ Find each HTML element and parse out the details into a row. """
 
     tags = get_tags(work)
@@ -176,7 +181,7 @@ def scrape_work(work, scrape_date):
     return row
 
 
-def get_soup(base_url, i):
+def get_soup(base_url: str, i: int) -> BeautifulSoup:
     """ Scrape the page, returning success and soup."""
 
     cur_url = base_url+str(i)
@@ -189,7 +194,8 @@ def get_soup(base_url, i):
         raise Exception("Page not found.")
 
 
-def write_works(fandom, writer, logger, start_page=1):
+def write_works(fandom: str, writer: Any,
+                logger: Logger, start_page: int = 1) -> None:
     """ Write meta information for each fandom as one row in the csv. """
 
     scrape_date = datetime.datetime.now().strftime("%Y%b%d")
@@ -222,7 +228,7 @@ def write_works(fandom, writer, logger, start_page=1):
                 writer.writerow(row)
             except csv.Error:
                 error_msg = 'Unexpected error writing to csv: ' + \
-                    start_page+[sys.exc_info()[0]]
+                    str(start_page)+str(sys.exc_info()[0])
                 logger.error(error_msg)
         start_page += 1
         try:
@@ -238,12 +244,12 @@ def write_works(fandom, writer, logger, start_page=1):
                 logger.info(err+err2)
                 return
             else:
-                time.delay(20*cfg.DELAY)
+                time.sleep(20*cfg.DELAY)
                 logger.error(f"Error attempts: {errors} of {cfg.MAX_ERRORS}")
     logger.info(f'Logged through page: {start_page}')
 
 
-def find_last_page(log_path):
+def find_last_page(log_path: Path) -> int:
     ''' Parse log file to find last page scraped '''
 
     page = 1
@@ -261,8 +267,9 @@ def find_last_page(log_path):
     return -1
 
 
-def scrape_starting_at(fandom, meta_path, log_path, msg='',
-                       page=1, from_the_top=True):
+def scrape_starting_at(fandom: str, meta_path: Path, log_path: Path,
+                       msg: str = '', page: int = 1,
+                       from_the_top: bool = True):
 
     if from_the_top:
         with open(meta_path, 'w') as f_out:
@@ -304,7 +311,7 @@ def scrape_starting_at(fandom, meta_path, log_path, msg='',
             fh.close()
 
 
-def scrape(fandom, from_the_top=True):
+def scrape(fandom: str, from_the_top: bool = True):
     """Initialize and error checking to determine what state scraping is in."""
 
     meta_path = paths.meta_path(fandom)
