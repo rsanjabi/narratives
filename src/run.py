@@ -11,8 +11,8 @@ import config as cfg
 for fandom in cfg.TEST_FANDOM_LIST:
     print(f"Starting to scrape: {fandom}")
     try:
-        meta.scrape(fandom, from_the_top=False)
-        kudos.scrape(fandom, from_the_top=False)
+        meta.scrape(fandom, from_the_top=True)
+        kudos.scrape(fandom, from_the_top=True)
         print(f"finished scraping meta and kudos for : {fandom}")
     except Exception as e:
         print(f"Ran into problem with {fandom}: {e}")
