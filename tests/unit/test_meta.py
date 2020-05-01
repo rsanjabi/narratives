@@ -16,9 +16,10 @@ class TestMeta(unittest.TestCase):
         pass
 
     def setUp(self):
-        url = 'https://archiveofourown.org/tags/'
-        postfix = 'Star%20Wars%20-%20All%20Media%20Types/works'
-        TestMeta.bs = BeautifulSoup(urlopen(url+postfix), 'html.parser')
+        url = ('https://archiveofourown.org/tags/'
+               'Star%20Wars%20-%20All%20Media%20Types/works')
+        print(url)
+        TestMeta.bs = BeautifulSoup(urlopen(url), 'html.parser')
 
     def tearDown(self):
         pass
