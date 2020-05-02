@@ -17,25 +17,27 @@ from typing import Tuple
 import datetime
 from pathlib import Path
 
-''' TODO: add throw exception for ValueException '''
+''' TODO: check for wrong param add throw exception for ValueException '''
 
 
 class PageTracker():
 
     def __init__(self, fandom_path: Path, type: str):
 
+        self.unscraped = '-1'   # constant for when unscraped
         self.file_path = fandom_path.joinpath('.' + type)
+        date = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
 
         if os.path.exists(self.file_path) is False:
-            with open(self.file_path, 'w') as _:
-                pass
+            with open(self.file_path, 'w') as f_out:
+                f_out.write(f"{self.unscraped}, {date}")
 
-    def write(self, page: int) -> None:
+    def write(self, page: str) -> None:
         date = datetime.datetime.now().strftime("%Y%b%d")
         with open(self.file_path, 'w') as f_out:
-            f_out.write(str(page) + ', ' + date)
+            f_out.write(page + ', ' + date)
 
-    def read(self) -> Tuple[int, str]:
+    def read(self) -> Tuple[str, str]:
         with open(self.file_path, 'r') as f_in:
             last_page, date = f_in.read().split(',')
-        return int(last_page), date
+        return last_page, date
