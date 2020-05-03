@@ -1,5 +1,5 @@
 """In progress refactoring of meta scraping functionality."""
-from typing import Generator
+# from typing import Generator
 
 from scrape.page import Page
 import utils.paths as paths
