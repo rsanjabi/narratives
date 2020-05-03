@@ -29,7 +29,7 @@ HTTP_HEADERS = {'User-Agent':
 
 # When testing a single fandom
 TEST_FANDOM = 'The Mandalorian (TV)'
-#TEST_FANDOM_LIST = ['The Mandalorian (TV)',
+# TEST_FANDOM_LIST = ['The Mandalorian (TV)',
 TEST_FANDOM_LIST = ['Star Wars: A New Dawn - John Jackson Miller',
                     'Star Wars: Kanan (Comics)']
 '''
