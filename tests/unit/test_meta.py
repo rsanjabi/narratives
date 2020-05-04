@@ -1,5 +1,5 @@
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
+# from urllib.request import urlopen
+# from bs4 import BeautifulSoup
 import unittest
 # from unittest.mock import patch
 # import scrape.meta as meta

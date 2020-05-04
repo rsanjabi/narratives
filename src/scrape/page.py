@@ -47,12 +47,12 @@ class Page(ABC):
             if self.from_top is True or mode == 'a':
                 self.writer.writerow(header)
             pages = self._get_pages()
-            for page, state in pages:
-                page_elements = self._get_data(page)
-                for row in page_elements:
-                    pass
+            for page, page_num in pages:
+                page_elements = self._get_page_elements(page)
+                for element in page_elements:
+                    print(f"element: {element})")
                     # self._write_results(row)
-                self.progress.write(state)
+                self.progress.write(page_num)
         return
 
     def _get_soup(self, url: str) -> BeautifulSoup:
@@ -70,7 +70,7 @@ class Page(ABC):
         pass
 
     @abstractmethod
-    def _get_data(self, page_text: str):
+    def _get_page_elements(self, page_text: str):
         pass
 
     @abstractmethod

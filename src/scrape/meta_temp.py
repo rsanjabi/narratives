@@ -1,8 +1,11 @@
 ''' In progress refactoring of meta scraping functionality.'''
 import time
-# import datetime
+import datetime
 from typing import Generator, List, Tuple, Any
+
 from urllib.parse import quote
+from bs4 import BeautifulSoup
+from unidecode import unidecode
 
 from scrape.page import Page
 import utils.paths as paths
@@ -35,7 +38,7 @@ class Meta(Page):
                   'scrape_date']
         super().scrape(header)
 
-    def _get_pages(self) -> Generator[Tuple[str, str], None, None]:
+    def _get_pages(self) -> Generator[Tuple[BeautifulSoup, str], None, None]:
 
         try:
             page_num = int(self.last)
@@ -70,7 +73,7 @@ class Meta(Page):
             else:
                 self.logger.info(f'Scraping PAGE: {str(page_num)}')
                 time.sleep(cfg.DELAY)
-                yield (soup.get_text, str(page_num))
+                yield (soup, str(page_num))
                 page_num += 1
                 url = self.base_url + str(page_num)
 
@@ -90,9 +93,139 @@ class Meta(Page):
                                   f'{cfg.MAX_ERRORS-attempts} attempts left.')
             return Exception
 
-    def _get_data(self, soup: str) -> List[Any]:
-        print(f"DEBUG1")
-        return ['a']
+    def _get_page_elements(self, page: BeautifulSoup) -> Generator[List[str],
+                                                                   None, None]:
+        """ Find each HTML element and parse out the details into a row. """
+
+        scrape_date = datetime.datetime.now().strftime("%Y%b%d")
+
+        works = page.find_all(class_="work blurb group")
+        for work in works:
+            tags = self._get_tags(work)
+            req_tags = self._get_required_tags(work)
+            stats = self._get_stats(work)
+            header_tags = self._get_header(work)
+            fandoms = self._get_fandoms(work)
+            summary = self._get_summary(work)
+            updated = self._get_updated(work)
+            series = self._get_series(work)
+            row = header_tags + req_tags + fandoms + \
+                list(map(lambda x: ', '.join(x), tags)) + summary + stats + \
+                series + updated + [scrape_date]
+            yield row
+
+    def _get_tags(self, meta: BeautifulSoup) -> Any:
+        """Find relationships, characters, and freeforms tags"""
+
+        tags = ['relationships', 'characters', 'freeforms']
+        return list(map(lambda tag: self._get_tag_info(tag, meta), tags))
+
+    def _get_tag_info(self, category: str, meta: BeautifulSoup) -> List[str]:
+        """ Find relationships, characters, and freeforms tags."""
+        try:
+            tag_list = meta.find_all("li", class_=category)
+        except AttributeError:
+            return []
+        return [unidecode(result.text) for result in tag_list]
+
+    def _get_required_tags(self, work: BeautifulSoup) -> List[str]:
+        """Finds required tags."""
+
+        req_tags = work.find(class_='required-tags').find_all('a')
+        return [x.text for x in req_tags]
+
+    def _get_stats(self, work: BeautifulSoup) -> List[str]:
+        """
+        Find stats (language, published, status, date status, words, chapters,
+        comments, kudos, bookmarks, hits
+        """
+
+        categories = ['language', 'words', 'chapters', 'collections',
+                      'comments', 'kudos', 'bookmarks', 'hits']
+        stats = []
+        for cat in categories:
+            try:
+                result = work.find("dd", class_=cat).text
+            except AttributeError:
+                result = ""
+            stats.append(result)
+        return stats
+
+    def _get_header(self, work: BeautifulSoup) -> List[str]:
+        '''Finds header information
+           (work_id, title, author, gifted to user).'''
+
+        result = work.find('h4', class_='heading').find_all('a')
+        work_id = result[0].get('href').strip('/works/')
+        title = result[0].text
+
+        auth_list = []
+        header_text = work.find('h4', class_='heading').text
+        if "Anonymous" in header_text:
+            auth = "Anonymous"
+        else:
+            authors = work.find_all('a', rel='author')
+            for author in authors:
+                auth_list.append(author.text)
+            auth_str = str(auth_list)
+            auth = auth_str.replace('[', '').replace(']', '').replace("'", '')
+
+        gift_list = []
+        for link in result:
+            href = link.get('href')
+            if 'gifts' in href:
+                gift_list.append(link.text)
+
+        if len(gift_list) == 0:
+            gift = ""
+        else:
+            gift_str = str(gift_list)
+            gift = gift_str.replace('[', '').replace(']', '').replace("'", '')
+
+        return [work_id, title, auth, gift]
+
+    def _get_fandoms(self, work: BeautifulSoup) -> List[str]:
+        """ Find the list of fandoms."""
+
+        fandoms = ''
+        try:
+            tag_list = work.find('h5', class_='fandoms heading').find_all('a')
+            fan_list = [x.text for x in tag_list]
+            fandoms = ", ".join(fan_list)
+        except AttributeError:
+            return []
+        return [fandoms]
+
+    def _get_summary(self, work: BeautifulSoup) -> List[str]:
+        """ Find summary description and return as list of strings. """
+
+        try:
+            summary_string = work.find('blockquote',
+                                       class_='userstuff summary')
+            summary = summary_string.text.strip().replace('\n', ' ')
+        except AttributeError:
+            summary = ""
+        return [summary]
+
+    def _get_updated(self, work: BeautifulSoup) -> List[str]:
+        """ Find update date. Return as list of strings. """
+
+        try:
+            date = work.find('p', class_='datetime').text
+        except AttributeError:
+            date = ""
+        return [date]
+
+    def _get_series(self, work: BeautifulSoup) -> List[str]:
+        """ Find series info and return as list. """
+
+        try:
+            series = work.find('ul', class_='series')
+            part = series.find('strong').text
+            s_name = series.find('a').text
+        except AttributeError:
+            part, s_name = "", ""
+        return [part, s_name]
 
     def _write_results(self):
         print(f"DEBUG2")
