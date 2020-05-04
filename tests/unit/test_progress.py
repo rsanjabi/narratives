@@ -1,11 +1,9 @@
-''' Unit test for Page objects'''
+''' Unit test for page_tracker'''
 
 import unittest
 
-from scrape.meta_temp import Meta
 
-
-class TestMeta(unittest.TestCase):
+class TestProgress(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -16,21 +14,12 @@ class TestMeta(unittest.TestCase):
         pass
 
     def setUp(self):
-        self.page = Meta("Test Fandom", True)
+        pass
 
     def tearDown(self):
         pass
 
     def test_init_(self):
-        pass
-
-    def test_scrape(self):
-        pass
-
-    def test_init_log(self):
-        pass
-
-    def test_start_from_top(self):
         pass
 
 

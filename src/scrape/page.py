@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 import requests
 import utils.paths as paths
 import config as cfg
-from scrape.page_tracker import PageTracker
+from scrape.page_tracker import Progress
 
 
 class Page(ABC):
@@ -30,7 +30,7 @@ class Page(ABC):
         self.base_url = base_url
 
         self.fandom_path = paths.fandom_path(page_kind)
-        self.progress = PageTracker(self.fandom_path, self.type)
+        self.progress = Progress(self.fandom_path, self.type)
         self.last = self.progress.read()[0]
         self.logger = self._init_log()
         self.from_top = self._start_from_top(from_top)
@@ -46,14 +46,22 @@ class Page(ABC):
             self.writer = csv.writer(f_out)
             if self.from_top is True or mode == 'a':
                 self.writer.writerow(header)
-            pages = self._get_pages()
+            pages = self._pages()
             for page, page_num in pages:
-                page_elements = self._get_page_elements(page)
+                page_elements = self._page_elements(page)
                 for element in page_elements:
-                    print(f"element: {element})")
-                    # self._write_results(row)
+                    # print(f"element: {element})")
+                    self.writer.writerow(element)
                 self.progress.write(page_num)
         return
+
+    @abstractmethod
+    def _pages(self):
+        pass
+
+    @abstractmethod
+    def _page_elements(self, page_text: str):
+        pass
 
     def _get_soup(self, url: str) -> BeautifulSoup:
         ''' Scrape the page, returning success and soup.'''
@@ -64,18 +72,6 @@ class Page(ABC):
             return soup
         else:
             raise Exception("Page not found.")
-
-    @abstractmethod
-    def _get_pages(self):
-        pass
-
-    @abstractmethod
-    def _get_page_elements(self, page_text: str):
-        pass
-
-    @abstractmethod
-    def _write_results(self, results):
-        pass
 
     def _init_log(self) -> Logger:
         logger = logging.getLogger(self.page_kind+self.type)

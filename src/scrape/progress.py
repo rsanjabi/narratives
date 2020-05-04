@@ -1,5 +1,5 @@
 '''
-    PageTracker reads and writes a single line from a file in order to store
+    Progress reads and writes a single line from a file in order to store
     the last page that the Scraper classes have processed.
 
     Pages are stored in the fandom path directory as .meta or .kudos.
@@ -18,7 +18,7 @@ import datetime
 from pathlib import Path
 
 
-class PageTracker():
+class Progress():
 
     def __init__(self, fandom_path: Path, type: str):
 
