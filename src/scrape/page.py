@@ -3,6 +3,7 @@
 '''
 
 from abc import ABC, abstractmethod
+from typing import List
 import logging
 from logging import Logger
 from pathlib import Path
@@ -34,7 +35,7 @@ class Page(ABC):
         self.logger = self._init_log()
         self.from_top = self._start_from_top(from_top)
 
-    def scrape(self) -> None:
+    def scrape(self, header: List[str]) -> None:
 
         if self.from_top is True:
             mode = 'w'
@@ -44,23 +45,14 @@ class Page(ABC):
         with open(self.path, mode) as f_out:
             self.writer = csv.writer(f_out)
             if self.from_top is True or mode == 'a':
-                header = ['work_id', 'title', 'author', 'gifted', 'rating',
-                          'warnings', 'category', 'status', 'fandom',
-                          'relationship', 'character', 'additional tags',
-                          'summary', 'language', 'words', 'chapters',
-                          'collections', 'comments', 'kudos', 'bookmarks',
-                          'hits', 'series_part', 'series_name', 'updated',
-                          'scrape_date']
                 self.writer.writerow(header)
-
             pages = self._get_pages()
-            for page in pages:
-                print(page)
-                '''
-                row, state = self._get_data(page)
-                self._write_results(results)
+            for page, state in pages:
+                page_elements = self._get_data(page)
+                for row in page_elements:
+                    pass
+                    # self._write_results(row)
                 self.progress.write(state)
-                '''
         return
 
     def _get_soup(self, url: str) -> BeautifulSoup:
@@ -92,6 +84,7 @@ class Page(ABC):
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(message)s')
         fh.setFormatter(formatter)
         logger.addHandler(fh)
+        logger.info("********************************")
 
         return logger
 

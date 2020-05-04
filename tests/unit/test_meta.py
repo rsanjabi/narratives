@@ -16,8 +16,8 @@ class TestMeta(unittest.TestCase):
         pass
 
     def setUp(self):
-        url = ('https://archiveofourown.org/tags/'
-               'Star%20Wars%20-%20All%20Media%20Types/works')
+        url = (f'https://archiveofourown.org/tags/'
+               f'Star%20Wars%20-%20All%20Media%20Types/works')
         print(url)
         TestMeta.bs = BeautifulSoup(urlopen(url), 'html.parser')
 

@@ -1,7 +1,7 @@
 ''' In progress refactoring of meta scraping functionality.'''
 import time
 # import datetime
-from typing import Generator
+from typing import Generator, List, Tuple, Any
 from urllib.parse import quote
 
 from scrape.page import Page
@@ -25,17 +25,26 @@ class Meta(Page):
     def insert(self):
         pass
 
-    def _get_pages(self) -> Generator[str, None, None]:
+    def scrape(self):
+        header = ['work_id', 'title', 'author', 'gifted', 'rating',
+                  'warnings', 'category', 'status', 'fandom',
+                  'relationship', 'character', 'additional tags',
+                  'summary', 'language', 'words', 'chapters',
+                  'collections', 'comments', 'kudos', 'bookmarks',
+                  'hits', 'series_part', 'series_name', 'updated',
+                  'scrape_date']
+        super().scrape(header)
+
+    def _get_pages(self) -> Generator[Tuple[str, str], None, None]:
 
         try:
             page_num = int(self.last)
-            print(f"DEBUG: {page_num}")
         except ValueError:
             self.logger.error(f'Last scraped value ({self.last})'
                               f' in .meta is not a number')
             raise ValueError
 
-        if page_num == -1:
+        if page_num == -1 or self.from_top is True:
             page_num = 1
         else:
             page_num += 1
@@ -60,10 +69,10 @@ class Meta(Page):
                 time.sleep(cfg.DELAY*errors)   # exponential decay wait
             else:
                 self.logger.info(f'Scraping PAGE: {str(page_num)}')
+                time.sleep(cfg.DELAY)
+                yield (soup.get_text, str(page_num))
                 page_num += 1
                 url = self.base_url + str(page_num)
-                time.sleep(cfg.DELAY)
-                yield soup.get_text
 
     def _total_pages(self):
         ''' Make max attempts at loading base url to get starting number'''
@@ -74,16 +83,16 @@ class Meta(Page):
                 next_element = soup.find('li', class_='next')
                 max_pages = int(next_element.find_previous('li').text)
                 self.logger.info(f'Attempting to scrape up to '
-                                 f'{str(max_pages)}')
+                                 f'{str(max_pages)} pages.')
                 return max_pages
             except Exception:
                 self.logger.error(f'Base URL: {self.base_url} Not found. '
                                   f'{cfg.MAX_ERRORS-attempts} attempts left.')
             return Exception
 
-    def _get_data(self):
+    def _get_data(self, soup: str) -> List[Any]:
         print(f"DEBUG1")
-        pass
+        return ['a']
 
     def _write_results(self):
         print(f"DEBUG2")
