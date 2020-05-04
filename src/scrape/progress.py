@@ -31,7 +31,7 @@ class Progress():
                 f_out.write(f"{self.unscraped_flag}, {date}")
 
     def write(self, page: str) -> None:
-        date = datetime.datetime.now().strftime("%Y%b%d")
+        date = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
         with open(self.file_path, 'w') as f_out:
             f_out.write(page + ', ' + date)
 

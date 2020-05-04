@@ -1,7 +1,6 @@
 '''
     Abstract class for generic scraping actions
 '''
-
 from abc import ABC, abstractmethod
 from typing import List
 import logging
@@ -12,7 +11,7 @@ from bs4 import BeautifulSoup
 import requests
 import utils.paths as paths
 import config as cfg
-from scrape.page_tracker import Progress
+from scrape.progress import Progress
 
 
 class Page(ABC):
@@ -37,22 +36,22 @@ class Page(ABC):
 
     def scrape(self, header: List[str]) -> None:
 
-        if self.from_top is True:
+        if self.from_top is True or self.path.is_file() is False:
             mode = 'w'
         else:
             mode = 'a'
 
         with open(self.path, mode) as f_out:
             self.writer = csv.writer(f_out)
-            if self.from_top is True or mode == 'a':
+            if mode == 'w':
                 self.writer.writerow(header)
             pages = self._pages()
             for page, page_num in pages:
                 page_elements = self._page_elements(page)
                 for element in page_elements:
-                    # print(f"element: {element})")
                     self.writer.writerow(element)
                 self.progress.write(page_num)
+        self.logger.info(f'Completed scraping "{self.page_kind}"')
         return
 
     @abstractmethod
@@ -71,7 +70,7 @@ class Page(ABC):
             soup = BeautifulSoup(req.text, 'html.parser')
             return soup
         else:
-            raise Exception("Page not found.")
+            raise ConnectionError("Page not found.")
 
     def _init_log(self) -> Logger:
         logger = logging.getLogger(self.page_kind+self.type)

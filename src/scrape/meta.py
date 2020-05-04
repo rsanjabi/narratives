@@ -18,7 +18,7 @@ class Meta(Page):
         self.log_path = paths.meta_log_path(fandom)
         self.meta_path = paths.meta_path(fandom)
         url = (f'https://archiveofourown.org/tags/'
-               f'{quote(fandom)}/works?page=')
+               f'{quote(fandom, safe="")}/works?page=')
         super().__init__(fandom, 'meta',
                          self.log_path,
                          self.meta_path,
@@ -53,16 +53,28 @@ class Meta(Page):
         self.logger.info(f"Scraping: {self.base_url}")
         try:
             max_pages = self._total_pages()
+        except ConnectionError:
+            self.logger.error(f'Base URL: {self.base_url} Not found.')
+            raise ConnectionError(f"Error connecting to: {self.base_url}\n"
+                                  f"Could your fandom name be incorrect?")
         except Exception as e:
-            self.logger.error(f'Base URL: {self.base_url} Not found after '
-                              f'{cfg.MAX_ERRORS} (MAX) attempts.')
-            raise Exception(e)
+            self.logger.error(f'Base URL: {self.base_url} Not found.')
+            raise Exception(f"Other error: {e}")
 
         while errors < cfg.MAX_ERRORS and page_num <= max_pages:
             try:
                 url = self.base_url + str(page_num)
                 soup = self._get_soup(url)
+            except ConnectionError:
+                # 404 errors just move onto next page
+                self.logger.error(f'PAGE: {url} 404 Error. Skipping this work.'
+                                  f' {cfg.MAX_ERRORS-errors} attempts left.')
+                errors += 1
+                time.sleep(cfg.DELAY)
+                page_num += 1
+                url = self.base_url + str(page_num)
             except Exception:
+                # all other time out errors don't move onto next page yet
                 errors += 1
                 self.logger.error(f'PAGE: {url} Not found. '
                                   f'{cfg.MAX_ERRORS-errors} attempts left.')
@@ -95,7 +107,7 @@ class Meta(Page):
                 series + updated + [scrape_date]
             yield row
 
-    def _total_pages(self):
+    def _total_pages(self) -> int:
         ''' Make max attempts at loading base url to get starting number'''
 
         for attempts in range(cfg.MAX_ERRORS):
@@ -106,10 +118,14 @@ class Meta(Page):
                 self.logger.info(f'Attempting to scrape up to '
                                  f'{str(max_pages)} pages.')
                 return max_pages
-            except Exception:
+            except AttributeError:
+                self.logger.info(f'Attempting to scrape 1 page.')
+                return 1
+            except ConnectionError:
                 self.logger.error(f'Base URL: {self.base_url} Not found. '
                                   f'{cfg.MAX_ERRORS-attempts} attempts left.')
-            return Exception
+        raise Exception
+        return 0
 
     def _get_tags(self, meta: BeautifulSoup) -> Any:
         """Find relationships, characters, and freeforms tags"""
