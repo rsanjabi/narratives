@@ -46,11 +46,11 @@ class Page(ABC):
             if mode == 'w':
                 self.writer.writerow(header)
             pages = self._pages()
-            for page, page_num in pages:
+            for page, progress_num in pages:
                 page_elements = self._page_elements(page)
                 for element in page_elements:
                     self.writer.writerow(element)
-                self.progress.write(page_num)
+                self.progress.write(progress_num)
         self.logger.info(f'Completed scraping "{self.page_kind}"')
         return
 
@@ -59,7 +59,7 @@ class Page(ABC):
         pass
 
     @abstractmethod
-    def _page_elements(self, page_text: str):
+    def _page_elements(self, soup: BeautifulSoup):
         pass
 
     def _get_soup(self, url: str) -> BeautifulSoup:

@@ -90,7 +90,7 @@ class Meta(Page):
                                                                None, None]:
         """ Find each HTML element and parse out the details into a row. """
 
-        scrape_date = datetime.datetime.now().strftime("%Y%b%d")
+        scrape_date = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
 
         works = page.find_all(class_="work blurb group")
         for work in works:
