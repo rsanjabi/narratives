@@ -43,3 +43,8 @@ TEST_FANDOM_LIST = ['Star Wars: A New Dawn - John Jackson Miller',
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3
+
+HOST = 'ec2-18-233-32-61.compute-1.amazonaws.com'
+DATABASE = 'dfpl5i2v8o7hei'
+USER = 'shxuwmgilceeym'
+PASSWORD = '39bf9dbbf6b5ff00600743bffbac4dc0d08a977142570819d4f0b67ff3ac4fe4'
