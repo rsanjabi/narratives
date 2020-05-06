@@ -4,16 +4,27 @@
     Airflow in the future.
 '''
 
-import scrape.meta as meta
-import scrape.kudos as kudos
+from scrape.meta import Meta
+from scrape.kudos import Kudos
 import config as cfg
+
 
 for fandom in cfg.TEST_FANDOM_LIST:
     print(f"Starting to scrape: {fandom}")
     try:
-        meta.scrape(fandom, from_the_top=True)
-        kudos.scrape(fandom, from_the_top=True)
-        print(f"finished scraping meta and kudos for : {fandom}")
+        m = Meta(fandom, from_top=True)
+        m.scrape()
+        print(f"finished scraping meta for : {fandom}")
     except Exception as e:
         print(f"Ran into problem with {fandom}: {e}")
-print(f"Done.")
+print(f"Done with meta.")
+
+for fandom in cfg.TEST_FANDOM_LIST:
+    print(f"Starting to scrape: {fandom}")
+    try:
+        k = Kudos(fandom, from_top=True)
+        k.scrape()
+        print(f"finished scraping kudos for : {fandom}")
+    except Exception as e:
+        print(f"Ran into problem with {fandom}: {e}")
+print(f"Done with kudos.")
