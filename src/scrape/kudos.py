@@ -4,9 +4,7 @@ import datetime
 import csv
 from typing import Generator, Tuple, List
 
-# from urllib.parse import quote
 from bs4 import BeautifulSoup
-# from unidecode import unidecode
 
 from scrape.page import Page
 import utils.paths as paths
@@ -15,7 +13,7 @@ import config as cfg
 
 class Kudos(Page):
 
-    def __init__(self, fandom: str, from_top: bool):
+    def __init__(self, fandom: str, from_top: bool = True):
         self.log_path = paths.kudo_log_path(fandom)
         self.kudo_path = paths.kudo_path(fandom)
         self.input_path = paths.meta_path(fandom)

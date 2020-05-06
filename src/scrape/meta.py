@@ -14,7 +14,7 @@ import config as cfg
 
 class Meta(Page):
 
-    def __init__(self, fandom: str, from_top: bool):
+    def __init__(self, fandom: str, from_top: bool = True):
         self.log_path = paths.meta_log_path(fandom)
         self.meta_path = paths.meta_path(fandom)
         url = (f'https://archiveofourown.org/tags/'
