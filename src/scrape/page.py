@@ -9,6 +9,7 @@ from pathlib import Path
 import csv
 from bs4 import BeautifulSoup
 import requests
+from requests.exceptions import ConnectTimeout, HTTPError, RequestException
 import utils.paths as paths
 import config as cfg
 from scrape.progress import Progress
@@ -23,7 +24,7 @@ class Page(ABC):
                  base_url: str,
                  from_top: bool):
         self.page_kind = page_kind  # fandom or media page
-        self.type = type
+        self.type = type            # eg meta or kudos or ...
         self.log_path = log_path
         self.path = path
         self.base_url = base_url
@@ -66,11 +67,17 @@ class Page(ABC):
         ''' Scrape the page, returning success and soup.'''
 
         req = requests.get(url, headers=cfg.HTTP_HEADERS)
-        if req.status_code == 200:
+        try:
+            req.raise_for_status()
+        except ConnectTimeout:
+            raise ConnectTimeout
+        except HTTPError:
+            raise HTTPError
+        except RequestException:
+            raise RequestException
+        else:
             soup = BeautifulSoup(req.text, 'html.parser')
             return soup
-        else:
-            raise ConnectionError("Page not found.")
 
     def _init_log(self) -> Logger:
         logger = logging.getLogger(self.page_kind+self.type)

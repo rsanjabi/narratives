@@ -5,6 +5,7 @@ import csv
 from typing import Generator, Tuple, List
 
 from bs4 import BeautifulSoup
+from requests.exceptions import ConnectTimeout, HTTPError
 
 from scrape.page import Page
 import utils.paths as paths
@@ -35,6 +36,8 @@ class Kudos(Page):
         else:
             encountered = False
 
+        errors = 0
+
         with open(self.input_path, 'r') as f_in:
             reader = csv.reader(f_in)
             for i, row in enumerate(reader):
@@ -48,10 +51,25 @@ class Kudos(Page):
                     continue
                 url = self.base_url + row[0] + '/kudos'
                 self.fandom_id = row[0]
-                soup = self._get_soup(url)
-                self.logger.info(f"Scraped id: {self.fandom_id}")
-                time.sleep(cfg.DELAY)
-                yield soup, self.fandom_id
+                try:
+                    soup = self._get_soup(url)
+                    self.logger.info(f"Scraped id: {self.fandom_id}")
+                except HTTPError:
+                    self.logger.info(f"HTTPError/skipping: {self.fandom_id}")
+                except ConnectTimeout:
+                    self.logger.error(f"ConnectionTimeout "
+                                      f"on: {self.fandom_id}")
+                    if errors > cfg.MAX_ERRORS:
+                        self.logger.error(f"{cfg.MAX_ERRORS} "
+                                          f"encountered. Aborting.")
+                        return
+                    self.logger.error(f"{cfg.MAX_ERRORS-errors} errors left.")
+                    errors += 1
+                    time.sleep(cfg.DELAY*errors*10)    # Increase sleep time
+                else:
+                    yield soup, self.fandom_id
+                finally:
+                    time.sleep(cfg.DELAY)
 
     def _page_elements(self, soup: BeautifulSoup) -> Generator[List[str],
                                                                None, None]:

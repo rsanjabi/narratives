@@ -12,7 +12,6 @@ def fandom_path(fandom: str) -> Path:
 
 
 def kudo_log_path(fandom: str) -> object:
-
     fandom_dir = replace_symbol(fandom)
     path = Path() / cfg.DATA_PATH / fandom_dir
     if not path.exists():
@@ -42,6 +41,14 @@ def meta_log_path(fandom: str) -> Path:
     if not path.exists():
         path.mkdir(parents=True)
     return path.joinpath(cfg.META_PREFIX + cfg.LOG_SUFFIX)
+
+
+def meta_db_log_path(fandom: str) -> Path:
+    fandom_dir = replace_symbol(fandom)
+    path = Path() / cfg.DATA_PATH / fandom_dir
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath(cfg.META_DB_PREFIX + cfg.LOG_SUFFIX)
 
 
 def matrix_log_path() -> Path:

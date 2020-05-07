@@ -6,6 +6,7 @@ from typing import Generator, List, Tuple, Any
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from unidecode import unidecode
+from requests.exceptions import ConnectTimeout, HTTPError
 
 from scrape.page import Page
 import utils.paths as paths
@@ -65,16 +66,16 @@ class Meta(Page):
             try:
                 url = self.base_url + str(page_num)
                 soup = self._get_soup(url)
-            except ConnectionError:
-                # 404 errors just move onto next page
+            except HTTPError:
+                # just move onto next page
                 self.logger.error(f'PAGE: {url} 404 Error. Skipping this work.'
                                   f' {cfg.MAX_ERRORS-errors} attempts left.')
                 errors += 1
                 time.sleep(cfg.DELAY)
                 page_num += 1
                 url = self.base_url + str(page_num)
-            except Exception:
-                # all other time out errors don't move onto next page yet
+            except ConnectTimeout:
+                # Try again
                 errors += 1
                 self.logger.error(f'PAGE: {url} Not found. '
                                   f'{cfg.MAX_ERRORS-errors} attempts left.')
@@ -121,10 +122,10 @@ class Meta(Page):
             except AttributeError:
                 self.logger.info(f'Attempting to scrape 1 page.')
                 return 1
-            except ConnectionError:
+            except ConnectTimeout:
                 self.logger.error(f'Base URL: {self.base_url} Not found. '
                                   f'{cfg.MAX_ERRORS-attempts} attempts left.')
-        raise Exception
+        raise ConnectTimeout
         return 0
 
     def _get_tags(self, meta: BeautifulSoup) -> Any:

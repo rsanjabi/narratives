@@ -16,6 +16,7 @@ INDICES_PREFIX = 'indices'
 MODEL_PREFIX = 'implicit'
 KUDO_PREFIX = 'kudos'
 META_PREFIX = 'meta'
+META_DB_PREFIX = 'meta_db'
 
 LOG_SUFFIX = '.log'
 DATA_SUFFIX = '.csv'
@@ -30,9 +31,9 @@ HTTP_HEADERS = {'User-Agent':
 # When testing a single fandom
 TEST_FANDOM = 'The Mandalorian (TV)'
 # TEST_FANDOM_LIST = ['The Mandalorian (TV)',
-TEST_FANDOM_LIST = ['Star Wars: A New Dawn - John Jackson Miller',
-                    'Star Wars: Kanan (Comics)']
+TEST_FANDOM_LIST = ['Star Wars: A New Dawn - John Jackson Miller']
 '''
+                    'Star Wars: Kanan (Comics)']
                     'Star Wars: A New Dawn - John Jackson Miller',
                     'Star Wars: Kanan (Comics)',
                     'Star Wars: Thrawn Series - Timothy Zahn (2017)',
@@ -45,6 +46,9 @@ TEST_FANDOM_LIST = ['Star Wars: A New Dawn - John Jackson Miller',
 MAX_ERRORS = 3
 
 HOST = 'ec2-18-233-32-61.compute-1.amazonaws.com'
-DATABASE = 'dfpl5i2v8o7hei'
-USER = 'shxuwmgilceeym'
-PASSWORD = '39bf9dbbf6b5ff00600743bffbac4dc0d08a977142570819d4f0b67ff3ac4fe4'
+
+META_COLS = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
+             'category', 'status', 'fandom', 'relationship', 'character',
+             'additional_tags', 'summary', 'language', 'words', 'chapters',
+             'collections', 'comments', 'kudos', 'bookmarks', 'hits',
+             'series_part', 'series_name', 'updated', 'scrape_date']
