@@ -64,6 +64,5 @@ class AO3DB(ABC):
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         logger.info("********************************")
-        logger.info(f"logger name: {self.page_kind+self.type}")
 
         return logger
