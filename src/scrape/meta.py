@@ -1,7 +1,8 @@
 ''' In progress refactoring of meta scraping functionality.'''
 import time
 import datetime
-from typing import Generator, List, Tuple, Any
+from typing import Generator, List, Tuple, Any, Optional, Dict
+from mypy_extensions import TypedDict
 
 from urllib.parse import quote
 from bs4 import BeautifulSoup
@@ -11,6 +12,33 @@ from requests.exceptions import ConnectTimeout, HTTPError
 from scrape.page import Page
 import utils.paths as paths
 import config as cfg
+
+MetaJson = TypedDict('MetaJson', {
+                     'work_id': str,
+                     'title': str,
+                     'author': List[str],
+                     'gifted': Optional[List[str]],
+                     'rating': Optional[str],
+                     'warnings': List[str],
+                     'category': Optional[List[str]],
+                     'status': str,
+                     'fandom': List[str],
+                     'relationship': Optional[List[str]],
+                     'character': Optional[List[str]],
+                     'additional_tags': Optional[List[str]],
+                     'summary': Optional[str],
+                     'language': str,
+                     'words': int,
+                     'chapters': int,
+                     'collections': Optional[List[str]],
+                     'comments': int,
+                     'kudos': int,
+                     'bookmarks': int,
+                     'hits': int,
+                     'series_part': Optional[str],
+                     'series_name': Optional[str],
+                     'updated': Optional[str],
+                     'scrape_date': str})
 
 
 class Meta(Page):
@@ -27,14 +55,7 @@ class Meta(Page):
                          from_top)
 
     def scrape(self):
-        header = ['work_id', 'title', 'author', 'gifted', 'rating',
-                  'warnings', 'category', 'status', 'fandom',
-                  'relationship', 'character', 'additional tags',
-                  'summary', 'language', 'words', 'chapters',
-                  'collections', 'comments', 'kudos', 'bookmarks',
-                  'hits', 'series_part', 'series_name', 'updated',
-                  'scrape_date']
-        super().scrape(header)
+        super().scrape(cfg.META_COLS)
 
     def _pages(self) -> Generator[Tuple[BeautifulSoup, str], None, None]:
 
@@ -87,26 +108,25 @@ class Meta(Page):
                 page_num += 1
                 url = self.base_url + str(page_num)
 
-    def _page_elements(self, page: BeautifulSoup) -> Generator[List[str],
+    def _page_elements(self, page: BeautifulSoup) -> Generator[MetaJson,
                                                                None, None]:
         """ Find each HTML element and parse out the details into a row. """
 
-        scrape_date = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
+        time = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
+        meta: MetaJson = {'scrape_date': time}
 
         works = page.find_all(class_="work blurb group")
         for work in works:
-            tags = self._get_tags(work)
-            req_tags = self._get_required_tags(work)
-            stats = self._get_stats(work)
-            header_tags = self._get_header(work)
-            fandoms = self._get_fandoms(work)
-            summary = self._get_summary(work)
-            updated = self._get_updated(work)
-            series = self._get_series(work)
-            row = header_tags + req_tags + fandoms + \
-                list(map(lambda x: ', '.join(x), tags)) + summary + stats + \
-                series + updated + [scrape_date]
-            yield row
+            self._get_tags(work).update(meta)
+            self._get_required_tags(work).update(meta)
+            self._get_stats(work).update(meta)
+            self._get_header(work).update(meta)
+            meta['fandom'] = self._get_fandoms(work)
+            meta['summary'] = self._get_summary(work)
+            meta['updated'] = self._get_updated(work)
+            meta['series_part'], meta['series_name'] = self._get_series(work)
+
+            yield meta
 
     def _total_pages(self) -> int:
         ''' Make max attempts at loading base url to get starting number'''
@@ -130,9 +150,14 @@ class Meta(Page):
 
     def _get_tags(self, meta: BeautifulSoup) -> Any:
         """Find relationships, characters, and freeforms tags"""
-
-        tags = ['relationships', 'characters', 'freeforms']
-        return list(map(lambda tag: self._get_tag_info(tag, meta), tags))
+        tag_dict = {}   # type: Dict[str, Optional[List[str]]]
+        tags = ['relationship', 'characters', 'additional_tags']
+        for tag in tags:
+            try:
+                tag_dict[tag] = self._get_tag_info(tag, meta)
+            except Exception:
+                tag_dict[tag] = None
+        return tag_dict
 
     def _get_tag_info(self, category: str, meta: BeautifulSoup) -> List[str]:
         """ Find relationships, characters, and freeforms tags."""
@@ -142,47 +167,61 @@ class Meta(Page):
             return []
         return [unidecode(result.text) for result in tag_list]
 
-    def _get_required_tags(self, work: BeautifulSoup) -> List[str]:
+    def _get_required_tags(self, work: BeautifulSoup) -> Any:
         """Finds required tags."""
+        req_dict = {}
+        try:
+            req_tags = work.find(class_='required-tags').find_all('a')
+            req_dict['rating'] = req_tags[0]
+            req_dict['warning'] = req_tags[1]
+            req_dict['category'] = req_tags[2]
+            req_dict['status'] = req_tags[3]
+        except Exception:
+            req_dict['rating'] = None
+            req_dict['warning'] = None
+            req_dict['category'] = None
+            req_dict['status'] = None
+        return req_dict
 
-        req_tags = work.find(class_='required-tags').find_all('a')
-        return [x.text for x in req_tags]
-
-    def _get_stats(self, work: BeautifulSoup) -> List[str]:
+    def _get_stats(self, work: BeautifulSoup) -> Any:
         """
         Find stats (language, published, status, date status, words, chapters,
         comments, kudos, bookmarks, hits
         """
-
-        categories = ['language', 'words', 'chapters', 'collections',
-                      'comments', 'kudos', 'bookmarks', 'hits']
-        stats = []
-        for cat in categories:
+        str_categories = ['languge', 'chapters', 'collections']
+        num_categories = ['words', 'comments', 'kudos', 'bookmarks', 'hits']
+        stats = {}
+        for s_cat in str_categories:
             try:
-                result = work.find("dd", class_=cat).text
+                stats[s_cat] = work.find("dd", class_=s_cat).text
             except AttributeError:
-                result = ""
-            stats.append(result)
+                stats[s_cat] = None
+        for n_cat in num_categories:
+            try:
+                str_num = work.find("dd", class_=n_cat).text
+                stats[n_cat] = int(str_num.repalce(',', ''))
+            except AttributeError:
+                stats[n_cat] = None
         return stats
 
-    def _get_header(self, work: BeautifulSoup) -> List[str]:
+    def _get_header(self, work: BeautifulSoup) -> Any:
         '''Finds header information
            (work_id, title, author, gifted to user).'''
+        header_dict = {}
 
         result = work.find('h4', class_='heading').find_all('a')
-        work_id = result[0].get('href').strip('/works/')
-        title = result[0].text
+        header_dict['work_id'] = result[0].get('href').strip('/works/')
+        header_dict['title'] = result[0].text
 
         auth_list = []
         header_text = work.find('h4', class_='heading').text
         if "Anonymous" in header_text:
-            auth = "Anonymous"
+            header_dict['author'] = ["Anonymous"]
         else:
             authors = work.find_all('a', rel='author')
             for author in authors:
                 auth_list.append(author.text)
-            auth_str = str(auth_list)
-            auth = auth_str.replace('[', '').replace(']', '').replace("'", '')
+            header_dict['authors'] = auth_list
 
         gift_list = []
         for link in result:
@@ -191,12 +230,11 @@ class Meta(Page):
                 gift_list.append(link.text)
 
         if len(gift_list) == 0:
-            gift = ""
+            header_dict['gifted'] = None
         else:
-            gift_str = str(gift_list)
-            gift = gift_str.replace('[', '').replace(']', '').replace("'", '')
+            header_dict['gifted'] = gift_list
 
-        return [work_id, title, auth, gift]
+        return header_dict
 
     def _get_fandoms(self, work: BeautifulSoup) -> List[str]:
         """ Find the list of fandoms."""
@@ -210,7 +248,7 @@ class Meta(Page):
             return []
         return [fandoms]
 
-    def _get_summary(self, work: BeautifulSoup) -> List[str]:
+    def _get_summary(self, work: BeautifulSoup) -> Optional[str]:
         """ Find summary description and return as list of strings. """
 
         try:
@@ -218,19 +256,20 @@ class Meta(Page):
                                        class_='userstuff summary')
             summary = summary_string.text.strip().replace('\n', ' ')
         except AttributeError:
-            summary = ""
-        return [summary]
+            summary = None
+        return summary
 
-    def _get_updated(self, work: BeautifulSoup) -> List[str]:
+    def _get_updated(self, work: BeautifulSoup) -> Optional[str]:
         """ Find update date. Return as list of strings. """
 
         try:
             date = work.find('p', class_='datetime').text
         except AttributeError:
-            date = ""
-        return [date]
+            date = None
+        return date
 
-    def _get_series(self, work: BeautifulSoup) -> List[str]:
+    def _get_series(self, work: BeautifulSoup) \
+            -> Tuple[Optional[str], Optional[str]]:
         """ Find series info and return as list. """
 
         try:
@@ -238,5 +277,5 @@ class Meta(Page):
             part = series.find('strong').text
             s_name = series.find('a').text
         except AttributeError:
-            part, s_name = "", ""
-        return [part, s_name]
+            part, s_name = None, None
+        return part, s_name

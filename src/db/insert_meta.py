@@ -53,7 +53,6 @@ class Meta(AO3DB):
                         %(title)s,
                         %(author)s
                     )
-            
                     ON CONFLICT (work_id)
                     DO UPDATE SET (
                         work_id,
