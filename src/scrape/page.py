@@ -2,13 +2,13 @@
     Abstract class for generic scraping actions
 '''
 from abc import ABC, abstractmethod
-from typing import List
 import logging
 from logging import Logger
 from pathlib import Path
-import csv
+import json
 from bs4 import BeautifulSoup
 import requests
+from requests.exceptions import ConnectTimeout, HTTPError, RequestException
 import utils.paths as paths
 import config as cfg
 from scrape.progress import Progress
@@ -23,7 +23,7 @@ class Page(ABC):
                  base_url: str,
                  from_top: bool):
         self.page_kind = page_kind  # fandom or media page
-        self.type = type
+        self.type = type            # eg meta or kudos or ...
         self.log_path = log_path
         self.path = path
         self.base_url = base_url
@@ -34,7 +34,7 @@ class Page(ABC):
         self.logger = self._init_log()
         self.from_top = self._start_from_top(from_top)
 
-    def scrape(self, header: List[str]) -> None:
+    def scrape(self) -> None:
 
         if self.from_top is True or self.path.is_file() is False:
             mode = 'w'
@@ -42,14 +42,11 @@ class Page(ABC):
             mode = 'a'
 
         with open(self.path, mode) as f_out:
-            self.writer = csv.writer(f_out)
-            if mode == 'w':
-                self.writer.writerow(header)
             pages = self._pages()
             for page, progress_num in pages:
                 page_elements = self._page_elements(page)
                 for element in page_elements:
-                    self.writer.writerow(element)
+                    f_out.write(json.dumps(element)+'\n')
                 self.progress.write(progress_num)
         self.logger.info(f'Completed scraping "{self.page_kind}"')
         return
@@ -66,11 +63,17 @@ class Page(ABC):
         ''' Scrape the page, returning success and soup.'''
 
         req = requests.get(url, headers=cfg.HTTP_HEADERS)
-        if req.status_code == 200:
+        try:
+            req.raise_for_status()
+        except ConnectTimeout:
+            raise ConnectTimeout
+        except HTTPError:
+            raise HTTPError
+        except RequestException:
+            raise RequestException
+        else:
             soup = BeautifulSoup(req.text, 'html.parser')
             return soup
-        else:
-            raise ConnectionError("Page not found.")
 
     def _init_log(self) -> Logger:
         logger = logging.getLogger(self.page_kind+self.type)

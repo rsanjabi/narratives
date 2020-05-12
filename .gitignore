@@ -1,5 +1,6 @@
 # Dev Tools
 .vscode
+narratives-local.code-workspace
 
 # Distribution / packaging
 *.egg-info/

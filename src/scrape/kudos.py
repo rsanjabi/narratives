@@ -1,14 +1,21 @@
 ''' In progress refactoring of meta scraping functionality.'''
 import time
 import datetime
-import csv
+import json
 from typing import Generator, Tuple, List
+from mypy_extensions import TypedDict
 
 from bs4 import BeautifulSoup
+from requests.exceptions import ConnectTimeout, HTTPError
 
 from scrape.page import Page
 import utils.paths as paths
 import config as cfg
+
+KudosJson = TypedDict('KudosJson', {
+                     'work_id': str,
+                     'kudos': List[str],
+                     'scrape_date': str})
 
 
 class Kudos(Page):
@@ -25,8 +32,7 @@ class Kudos(Page):
                          from_top)
 
     def scrape(self):
-        header = ['work_id', 'user', 'scrape_date']
-        super().scrape(header)
+        super().scrape()
 
     def _pages(self) -> Generator[Tuple[BeautifulSoup, str], None, None]:
 
@@ -35,28 +41,41 @@ class Kudos(Page):
         else:
             encountered = False
 
+        errors = 0
+
         with open(self.input_path, 'r') as f_in:
-            reader = csv.reader(f_in)
-            for i, row in enumerate(reader):
-                # Skip header row
-                if i == 0:
-                    continue
-                # Write out rows again once we've encountered the work
+            for row_str in f_in:
+                row = json.loads(row_str)
                 if not encountered:
-                    if row[0] == self.last:
+                    if row['work_id'] == self.last:
                         encountered = True
                     continue
-                url = self.base_url + row[0] + '/kudos'
-                self.fandom_id = row[0]
-                soup = self._get_soup(url)
-                self.logger.info(f"Scraped id: {self.fandom_id}")
-                time.sleep(cfg.DELAY)
-                yield soup, self.fandom_id
+                url = self.base_url + row['work_id'] + '/kudos'
+                self.fandom_id = row['work_id']
+                try:
+                    soup = self._get_soup(url)
+                    self.logger.info(f"Scraped id: {self.fandom_id}")
+                except HTTPError:
+                    self.logger.info(f"HTTPError/skipping: {self.fandom_id}")
+                except ConnectTimeout:
+                    self.logger.error(f"ConnectionTimeout "
+                                      f"on: {self.fandom_id}")
+                    if errors > cfg.MAX_ERRORS:
+                        self.logger.error(f"{cfg.MAX_ERRORS} "
+                                          f"encountered. Aborting.")
+                        return
+                    self.logger.error(f"{cfg.MAX_ERRORS-errors} errors left.")
+                    errors += 1
+                    time.sleep(cfg.DELAY*errors*10)    # Increase sleep time
+                else:
+                    yield soup, self.fandom_id
+                finally:
+                    time.sleep(cfg.DELAY)
 
-    def _page_elements(self, soup: BeautifulSoup) -> Generator[List[str],
+    def _page_elements(self, soup: BeautifulSoup) -> Generator[KudosJson,
                                                                None, None]:
-        kudo_soup = soup.find(id="kudos").find_all('a')
-        # Convert to set to remove dups due to AO3 kudo errors
-        for kudo in set(kudo_soup):
-            yield ([self.fandom_id] + [kudo.text] +
-                   [datetime.datetime.now().strftime("%d/%b/%Y %H:%M")])
+        k_d: KudosJson = {}       # type: ignore
+        k_d['work_id'] = self.fandom_id
+        k_d['kudos'] = [x.text for x in soup.find(id="kudos").find_all('a')]
+        k_d['scrape_date'] = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
+        yield k_d
