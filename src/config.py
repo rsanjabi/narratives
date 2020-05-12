@@ -34,13 +34,11 @@ TEST_FANDOM_LIST = ['Star Wars Holiday Special (TV)',
                     'Star Wars: Ahsoka - E. K. Johnston',
                     'Star Wars: Shatterpoint - Matthew Stover',
                     'Star Wars: A New Dawn - John Jackson Miller',
-                    'Star Wars: Kanan (Comics)']
-'''
+                    'Star Wars: Kanan (Comics)',
+                    'The Mandalorian (TV)',
                     'Star Wars: Thrawn Series - Timothy Zahn (2017)',
-                    'Star Wars Original Trilogy',
                     'Star Wars: The Clone Wars (2008) - All Media Types'
                     ]
-'''
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3

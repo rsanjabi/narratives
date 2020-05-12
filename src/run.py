@@ -5,8 +5,8 @@
 '''
 from scrape.meta import Meta
 from scrape.kudos import Kudos
-from db.insert_meta import DBMeta
-from db.insert_kudos import DBKudos
+from db.insert_meta import DBMeta       # type: ignore
+from db.insert_kudos import DBKudos     # type: ignore
 import config as cfg
 
 for fandom in cfg.TEST_FANDOM_LIST:
@@ -14,7 +14,7 @@ for fandom in cfg.TEST_FANDOM_LIST:
     try:
         m = Meta(fandom, from_top=False)
         m.scrape()
-        print(f"finished scraping meta for : {fandom}")
+        print(f"Finished scraping meta for : {fandom}")
     except Exception as e:
         print(f"Ran into meta problem with {fandom}: {e}")
 print(f"Done with meta.")
@@ -30,7 +30,7 @@ for fandom in cfg.TEST_FANDOM_LIST:
 print(f"Done with kudos.")
 
 for fandom in cfg.TEST_FANDOM_LIST:
-    print(f"Inserting {fandom} into database.")
+    print(f"Inserting {fandom} meta into database.")
     try:
         db = DBMeta(fandom)
         db.insert()

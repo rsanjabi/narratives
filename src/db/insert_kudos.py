@@ -1,12 +1,13 @@
 import utils.paths as paths
 import sys
+from pathlib import Path
 from db.ao3_db import AO3DB
 
 
 class DBKudos(AO3DB):
-    def __init__(self, fandom: str):
-        self.kudo_path = paths.kudo_path(fandom)
-        self.kudos_db_log_path = paths.kudos_db_log_path(fandom)
+    def __init__(self, fandom: str) -> None:
+        self.kudo_path: Path = paths.kudo_path(fandom)
+        self.kudos_db_log_path: Path = paths.kudos_db_log_path(fandom)
         super().__init__(fandom,
                          self.kudo_path,
                          self.kudos_db_log_path,

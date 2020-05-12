@@ -1,13 +1,14 @@
 import utils.paths as paths
+from pathlib import Path
 
 import psycopg2
 from db.ao3_db import AO3DB
 
 
 class DBMeta(AO3DB):
-    def __init__(self, fandom: str):
-        self.meta_path = paths.meta_path(fandom)
-        self.meta_db_log_path = paths.meta_db_log_path(fandom)
+    def __init__(self, fandom: str) -> None:
+        self.meta_path: Path = paths.meta_path(fandom)
+        self.meta_db_log_path: Path = paths.meta_db_log_path(fandom)
         super().__init__(fandom,
                          self.meta_path,
                          self.meta_db_log_path,
@@ -196,7 +197,7 @@ class DBMeta(AO3DB):
             self.connect.commit()
             '''
 
-    def _table_creation(self):
+    def _table_creation(self) -> None:
         try:
             self.cursor.execute("""
                 CREATE TABLE staging_meta (
@@ -235,7 +236,7 @@ class DBMeta(AO3DB):
             self.connect.commit()
             self.logger.info("Table already exists.")
 
-    def _table_drop(self):
+    def _table_drop(self) -> None:
         try:
             sql = 'DROP TABLE staging_meta;'
             self.cursor.execute(sql)
