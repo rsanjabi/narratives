@@ -6,7 +6,7 @@ from mypy_extensions import TypedDict
 
 from urllib.parse import quote
 from bs4 import BeautifulSoup
-from unidecode import unidecode
+# from unidecode import unidecode
 from requests.exceptions import ConnectTimeout, HTTPError
 
 from scrape.page import Page
@@ -23,14 +23,14 @@ MetaJson = TypedDict('MetaJson', {
                      'category': Optional[List[str]],
                      'status': str,
                      'fandom': List[str],
-                     'relationship': Optional[List[str]],
-                     'character': Optional[List[str]],
-                     'additional_tags': Optional[List[str]],
+                     'relationships': Optional[List[str]],
+                     'characters': Optional[List[str]],
+                     'freeforms': Optional[List[str]],
                      'summary': Optional[str],
                      'language': str,
                      'words': int,
                      'chapters': int,
-                     'collections': Optional[List[str]],
+                     'collections': int,
                      'comments': int,
                      'kudos': int,
                      'bookmarks': int,
@@ -47,7 +47,7 @@ class Meta(Page):
         self.log_path = paths.meta_log_path(fandom)
         self.meta_path = paths.meta_path(fandom)
         url = (f'https://archiveofourown.org/tags/'
-               f'{quote(fandom, safe="")}/works?page=')
+               f'{quote(fandom).replace(".", "*d*")}/works?page=')
         super().__init__(fandom, 'meta',
                          self.log_path,
                          self.meta_path,
@@ -55,7 +55,7 @@ class Meta(Page):
                          from_top)
 
     def scrape(self):
-        super().scrape(cfg.META_COLS)
+        super().scrape()
 
     def _pages(self) -> Generator[Tuple[BeautifulSoup, str], None, None]:
 
@@ -113,18 +113,19 @@ class Meta(Page):
         """ Find each HTML element and parse out the details into a row. """
 
         time = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
-        meta: MetaJson = {'scrape_date': time}
+        meta: MetaJson = {}     # type: ignore
 
         works = page.find_all(class_="work blurb group")
         for work in works:
-            self._get_tags(work).update(meta)
-            self._get_required_tags(work).update(meta)
-            self._get_stats(work).update(meta)
-            self._get_header(work).update(meta)
+            meta.update(self._get_header(work))
+            meta.update(self._get_required_tags(work))
+            meta.update(self._get_tags(work))
+            meta.update(self._get_stats(work))
             meta['fandom'] = self._get_fandoms(work)
             meta['summary'] = self._get_summary(work)
-            meta['updated'] = self._get_updated(work)
             meta['series_part'], meta['series_name'] = self._get_series(work)
+            meta['updated'] = self._get_updated(work)
+            meta['scrape_date'] = time
 
             yield meta
 
@@ -151,35 +152,33 @@ class Meta(Page):
     def _get_tags(self, meta: BeautifulSoup) -> Any:
         """Find relationships, characters, and freeforms tags"""
         tag_dict = {}   # type: Dict[str, Optional[List[str]]]
-        tags = ['relationship', 'characters', 'additional_tags']
+        tags = ['relationships', 'characters', 'freeforms']
         for tag in tags:
-            try:
-                tag_dict[tag] = self._get_tag_info(tag, meta)
-            except Exception:
-                tag_dict[tag] = None
+            tag_dict[tag] = self._get_tag_info(tag, meta)
         return tag_dict
 
-    def _get_tag_info(self, category: str, meta: BeautifulSoup) -> List[str]:
+    def _get_tag_info(self, category: str, meta: BeautifulSoup) -> \
+            Optional[List[str]]:
         """ Find relationships, characters, and freeforms tags."""
         try:
             tag_list = meta.find_all("li", class_=category)
         except AttributeError:
-            return []
-        return [unidecode(result.text) for result in tag_list]
+            return None
+        return [result.text for result in tag_list]
 
     def _get_required_tags(self, work: BeautifulSoup) -> Any:
         """Finds required tags."""
         req_dict = {}
         try:
             req_tags = work.find(class_='required-tags').find_all('a')
-            req_dict['rating'] = req_tags[0]
-            req_dict['warning'] = req_tags[1]
-            req_dict['category'] = req_tags[2]
-            req_dict['status'] = req_tags[3]
+            req_dict['rating'] = req_tags[0].text
+            req_dict['warnings'] = req_tags[1].text.split(',')
+            req_dict['category'] = req_tags[2].text.split(',')
+            req_dict['status'] = req_tags[3].text
         except Exception:
             req_dict['rating'] = None
-            req_dict['warning'] = None
-            req_dict['category'] = None
+            req_dict['warnings'] = []
+            req_dict['category'] = []
             req_dict['status'] = None
         return req_dict
 
@@ -188,8 +187,9 @@ class Meta(Page):
         Find stats (language, published, status, date status, words, chapters,
         comments, kudos, bookmarks, hits
         """
-        str_categories = ['languge', 'chapters', 'collections']
-        num_categories = ['words', 'comments', 'kudos', 'bookmarks', 'hits']
+        str_categories = ['language', 'chapters']
+        num_categories = ['collections', 'words', 'comments', 'kudos',
+                          'bookmarks', 'hits']
         stats = {}
         for s_cat in str_categories:
             try:
@@ -199,9 +199,9 @@ class Meta(Page):
         for n_cat in num_categories:
             try:
                 str_num = work.find("dd", class_=n_cat).text
-                stats[n_cat] = int(str_num.repalce(',', ''))
+                stats[n_cat] = int(str_num.replace(',', ''))
             except AttributeError:
-                stats[n_cat] = None
+                stats[n_cat] = 0
         return stats
 
     def _get_header(self, work: BeautifulSoup) -> Any:
@@ -221,7 +221,7 @@ class Meta(Page):
             authors = work.find_all('a', rel='author')
             for author in authors:
                 auth_list.append(author.text)
-            header_dict['authors'] = auth_list
+            header_dict['author'] = auth_list
 
         gift_list = []
         for link in result:
@@ -230,7 +230,7 @@ class Meta(Page):
                 gift_list.append(link.text)
 
         if len(gift_list) == 0:
-            header_dict['gifted'] = None
+            header_dict['gifted'] = []
         else:
             header_dict['gifted'] = gift_list
 
@@ -238,15 +238,12 @@ class Meta(Page):
 
     def _get_fandoms(self, work: BeautifulSoup) -> List[str]:
         """ Find the list of fandoms."""
-
-        fandoms = ''
         try:
             tag_list = work.find('h5', class_='fandoms heading').find_all('a')
             fan_list = [x.text for x in tag_list]
-            fandoms = ", ".join(fan_list)
+            return fan_list
         except AttributeError:
             return []
-        return [fandoms]
 
     def _get_summary(self, work: BeautifulSoup) -> Optional[str]:
         """ Find summary description and return as list of strings. """

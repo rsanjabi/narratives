@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-# from typing import List
-# import csv
+from typing import Generator, Any
 import os
 import sys
+import json
 
 import logging
 from logging import Logger
@@ -17,9 +17,13 @@ import config as cfg
 
 class AO3DB(ABC):
 
-    def __init__(self, page_kind: str, log_path: Path, type: str):
+    def __init__(self, page_kind: str,
+                 data_path: Path,
+                 log_path: Path,
+                 type: str):
         self.page_kind = page_kind      # fandom or media kind
         self.type = type
+        self.data_path = data_path
         self.log_path = log_path
         self.cursor, self.connect = self.open()
         self.logger = self._init_log()
@@ -36,7 +40,6 @@ class AO3DB(ABC):
                             password=os.environ['DB_PASS'],
             )
             cur = connect.cursor()
-
         except Exception as e:
             print("There was an error connecting to the database: ", e)
             sys.exit()
@@ -44,7 +47,7 @@ class AO3DB(ABC):
         return cur, connect
 
     def close(self):
-        self.cursor.close()
+        # self.cursor.close()
         self.connect.close()
         print(f"Connection closed.")
 
@@ -66,3 +69,14 @@ class AO3DB(ABC):
         logger.info("********************************")
 
         return logger
+
+    def _rows(self) -> Generator[Any, None, None]:
+        with open(self.data_path, 'r') as f_in:
+            for row in f_in:
+                yield json.loads(row)
+
+    def _fanwork_exists(self, work_id: str) -> bool:
+        cur = self.connect.cursor()
+        sql = "SELECT EXISTS (SELECT 1 FROM staging_meta WHERE work_id = %s);"
+        cur.execute(sql, (work_id,))
+        return cur.fetchone()[0]
