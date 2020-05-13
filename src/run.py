@@ -17,9 +17,7 @@ for fandom in cfg.TEST_FANDOM_LIST:
         print(f"Finished scraping meta for : {fandom}")
     except Exception as e:
         print(f"Ran into meta problem with {fandom}: {e}")
-print(f"Done with meta.")
 
-for fandom in cfg.TEST_FANDOM_LIST:
     print(f"Starting to scrape {fandom} kudos.")
     try:
         k = Kudos(fandom, from_top=False)
@@ -27,9 +25,7 @@ for fandom in cfg.TEST_FANDOM_LIST:
         print(f"Finished scraping kudos for : {fandom}")
     except Exception as e:
         print(f"Ran into kudo problem with {fandom}: {e}")
-print(f"Done with kudos.")
 
-for fandom in cfg.TEST_FANDOM_LIST:
     print(f"Inserting {fandom} meta into database.")
     try:
         db = DBMeta(fandom)
@@ -37,9 +33,8 @@ for fandom in cfg.TEST_FANDOM_LIST:
         print(f"Finished inserting meta for : {fandom}")
     except Exception as e:
         print(f"Ran into problem inserting meta with {fandom}: {e}")
-print(f"Done with meta database insert.")
 
-for fandom in cfg.TEST_FANDOM_LIST:
+
     print(f"Inserting {fandom} kudos into database.")
     try:
         db = DBKudos(fandom)
@@ -47,4 +42,7 @@ for fandom in cfg.TEST_FANDOM_LIST:
         print(f"Finished inserting kudos for : {fandom}")
     except Exception as e:
         print(f"Ran into problem inserting kudos with {fandom}: {e}")
-print(f"Done with kudos database insert.")
+    
+    print(f"Done scraping {fandom}")
+
+print("Done scraping list.")

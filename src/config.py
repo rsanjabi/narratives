@@ -27,10 +27,17 @@ PICKLE_SUFFIX = '.pkl'
 HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
-# DELETE ME
+TEST_FANDOM_LIST = ['Star Wars: Princess Leia (Comics)',
+                    'Star Wars (Marvel Comics)',
+                    'Star Wars: Jedi: Fallen Order (Video Game)',
+                    'Journey to Star Wars: The Force Awakens',
+                    'Star Wars: Rebels',
+                    'Star Wars Original Trilogy',
+                    'Rogue One: A Star Wars Story (2016)'
+]
 
-# TEST_FANDOM_LIST = ['The Mandalorian (TV)',
-TEST_FANDOM_LIST = ['Star Wars Holiday Special (TV)',
+"""
+    'Star Wars Holiday Special (TV)',
                     'Star Wars: Ahsoka - E. K. Johnston',
                     'Star Wars: Shatterpoint - Matthew Stover',
                     'Star Wars: A New Dawn - John Jackson Miller',
@@ -39,11 +46,12 @@ TEST_FANDOM_LIST = ['Star Wars Holiday Special (TV)',
                     'Star Wars: Thrawn Series - Timothy Zahn (2017)',
                     'Star Wars: The Clone Wars (2008) - All Media Types'
                     ]
+"""
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3
 
-HOST = 'ec2-18-233-32-61.compute-1.amazonaws.com'
+HOST = 'ec2-52-23-14-156.compute-1.amazonaws.com'
 
 META_COLS = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
              'category', 'status', 'fandom', 'relationship', 'characters',
