@@ -27,7 +27,9 @@ PICKLE_SUFFIX = '.pkl'
 HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
-TEST_FANDOM_LIST = ['Star Wars: Princess Leia (Comics)',
+TEST_FANDOM_LIST = ['LEGO Star Wars - All Media Types']
+"""
+['Star Wars: Princess Leia (Comics)',
                     'Star Wars (Marvel Comics)',
                     'Star Wars: Jedi: Fallen Order (Video Game)',
                     'Journey to Star Wars: The Force Awakens',
@@ -35,7 +37,7 @@ TEST_FANDOM_LIST = ['Star Wars: Princess Leia (Comics)',
                     'Star Wars Original Trilogy',
                     'Rogue One: A Star Wars Story (2016)'
 ]
-
+"""
 """
     'Star Wars Holiday Special (TV)',
                     'Star Wars: Ahsoka - E. K. Johnston',

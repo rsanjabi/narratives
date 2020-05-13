@@ -200,7 +200,7 @@ class Meta(Page):
             try:
                 str_num = work.find("dd", class_=n_cat).text
                 stats[n_cat] = int(str_num.replace(',', ''))
-            except AttributeError:
+            except (AttributeError, ValueError):
                 stats[n_cat] = 0
         return stats
 

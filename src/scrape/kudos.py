@@ -31,9 +31,6 @@ class Kudos(Page):
                          url,
                          from_top)
 
-    def scrape(self):
-        super().scrape()
-
     def _pages(self) -> Generator[Tuple[BeautifulSoup, str], None, None]:
 
         if self.from_top is True or self.last == self.progress.unscraped_flag:
@@ -52,6 +49,12 @@ class Kudos(Page):
                     continue
                 url = self.base_url + row['work_id'] + '/kudos'
                 self.fandom_id = row['work_id']
+
+                # if self._recently_updated(row['work_id']):
+                #   self.logger.info(
+                #       f"Scrapped recently. Skipping: {self.fandom_id}"")
+                #   continue
+
                 try:
                     soup = self._get_soup(url)
                     self.logger.info(f"Scraped id: {self.fandom_id}")
@@ -79,3 +82,9 @@ class Kudos(Page):
         k_d['kudos'] = [x.text for x in soup.find(id="kudos").find_all('a')]
         k_d['scrape_date'] = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
         yield k_d
+
+    def _recently_updated(self, work_id: str) -> bool:
+
+        # open db connection, cursor
+        # sql = 'SELECT kudo_scraped_date
+        pass

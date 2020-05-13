@@ -8,11 +8,7 @@ import logging
 from logging import Logger
 from pathlib import Path
 import psycopg2
-# from psycopg2 import connect, sql
-
 import config as cfg
-# import utils.paths as paths
-# from scrape.progress import Progress
 
 
 class AO3DB(ABC):
