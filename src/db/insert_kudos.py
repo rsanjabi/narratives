@@ -13,7 +13,7 @@ class DBKudos(AO3DB):
                          self.kudos_db_log_path,
                          'kudos_db')
 
-    def insert(self) -> None:
+    def insert(self):
         self.logger.info(f"Opening {self.kudo_path}")
         rows = self._rows()
         for row in rows:
