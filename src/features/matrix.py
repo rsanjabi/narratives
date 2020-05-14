@@ -140,21 +140,21 @@ if __name__ == "__main__":
     kudo_df = create_megaframe(kudo_list)
     meta_df = create_megaframe(meta_list)
 
-    logger.info(f"Reading in kudos.")
+    logger.info("Reading in kudos.")
     empty_df = create_empty_df(kudo_df)
 
-    logger.info(f"Creating empty matrix.")
+    logger.info("Creating empty matrix.")
     data, indices = create_sparse_matrix(empty_df, kudo_list)
     logger.info(f" completed size: {data.shape}")
 
     # train the model on a sparse matrix of item/user/confidence weights
-    logger.info(f"Training model")
+    logger.info("Training model")
     modelBPR = bpr_rec(factors=50, verify_negative_samples=True)
     modelBPR.fit(sp.csr_matrix(data))
 
     # test_predictions(indices, invert_indices(indices), '13484820')
 
-    logger.info(f"Storing model for late inference.")
+    logger.info("Storing model for late inference.")
     store_data(modelBPR, indices, meta_df)
 
-    logger.info(f"Model building and features engineering complete.")
+    logger.info("Model building and features engineering complete.")
