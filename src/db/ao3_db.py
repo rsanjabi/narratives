@@ -45,7 +45,7 @@ class AO3DB(ABC):
     def close(self):
         # self.cursor.close()
         self.connect.close()
-        print(f"Connection closed.")
+        print("Connection closed.")
 
     @abstractmethod
     def insert(self):

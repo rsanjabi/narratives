@@ -224,10 +224,10 @@ class DBMeta(AO3DB):
                     hits                INT,
                     series_part         TEXT,
                     series_name         TEXT,
-                    updated             TEXT,
-                    scrape_date         TEXT,
+                    updated             DATE,
+                    scrape_date         TIMESTAMP,
                     kudo_givers         TEXT [],
-                    kudo_scr_date       TEXT
+                    kudo_scr_date       TIMESTAMP
                 );
             """)
             self.connect.commit()
