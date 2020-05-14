@@ -141,7 +141,7 @@ class Meta(Page):
                                  f'{str(max_pages)} pages.')
                 return max_pages
             except AttributeError:
-                self.logger.info(f'Attempting to scrape 1 page.')
+                self.logger.info('Attempting to scrape 1 page.')
                 return 1
             except ConnectTimeout:
                 self.logger.error(f'Base URL: {self.base_url} Not found. '

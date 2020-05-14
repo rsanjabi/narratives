@@ -24,7 +24,7 @@ class Kudos(Page):
         self.log_path = paths.kudo_log_path(fandom)
         self.kudo_path = paths.kudo_path(fandom)
         self.input_path = paths.meta_path(fandom)
-        url = (f'https://archiveofourown.org/works/')
+        url = ('https://archiveofourown.org/works/')
         super().__init__(fandom, 'kudos',
                          self.log_path,
                          self.kudo_path,
