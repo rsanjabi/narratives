@@ -61,4 +61,4 @@ META_COLS = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
              'collections', 'comments', 'kudos', 'bookmarks', 'hits',
              'series_part', 'series_name', 'updated', 'scrape_date']
 
-SCR_WINDOW = 1          # window for number of days before we rescrape kudos
+SCR_WINDOW = 21          # window for number of days before we rescrape kudos
