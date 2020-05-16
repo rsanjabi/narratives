@@ -61,7 +61,6 @@ class Kudos(Page):
                 if self._recently_updated(row['work_id']):
                     self.logger.info(
                         f"Scraped recently. Skipping: {self.fandom_id}")
-                    print(f"Scraped recently. Skipping: {self.fandom_id}")
                     continue
 
                 try:
@@ -95,4 +94,6 @@ class Kudos(Page):
     def _recently_updated(self, work_id: str) -> bool:
         kudo_db = DBKudos(self.page_kind)
         scr_date = kudo_db.kudo_scrape_date(work_id)
+        if scr_date is None:
+            return False
         return (scr_date > (datetime.now()-timedelta(cfg.SCR_WINDOW)))

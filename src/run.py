@@ -12,7 +12,7 @@ import config as cfg
 for fandom in cfg.TEST_FANDOM_LIST:
     print(f"Starting to scrape {fandom} meta.")
     try:
-        m = Meta(fandom, from_top=False)
+        m = Meta(fandom, from_top=True)
         m.scrape()
         print(f"Finished scraping meta for : {fandom}")
     except Exception as e:
@@ -20,7 +20,7 @@ for fandom in cfg.TEST_FANDOM_LIST:
 
     print(f"Starting to scrape {fandom} kudos.")
     try:
-        k = Kudos(fandom, from_top=True)
+        k = Kudos(fandom, from_top=False)
         k.scrape()
         print(f"Finished scraping kudos for : {fandom}")
     except Exception as e:
