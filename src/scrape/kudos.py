@@ -11,7 +11,7 @@ from requests.exceptions import ConnectTimeout, HTTPError
 from scrape.page import Page
 import utils.paths as paths
 import config as cfg
-from db.kudos_db import DBKudos
+from db.kudos_db import DBKudos     # type: ignore
 
 KudosJson = TypedDict('KudosJson', {
                      'work_id': str,
