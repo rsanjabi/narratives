@@ -28,7 +28,6 @@ class AO3DB(ABC):
     def open(self):
         ''' Open database connection. Returns cursor and connection '''
         try:
-            print("Opening connection...")
             connect = psycopg2.connect(
                             host=cfg.HOST,
                             database=os.environ['DB_NAME'],
@@ -43,7 +42,7 @@ class AO3DB(ABC):
         return cur, connect
 
     def close(self):
-        # self.cursor.close()
+        self.cursor.close()
         self.connect.close()
         print("Connection closed.")
 

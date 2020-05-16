@@ -1,5 +1,6 @@
 import utils.paths as paths
 import sys
+from datetime import datetime
 from pathlib import Path
 from db.ao3_db import AO3DB
 
@@ -45,3 +46,9 @@ class DBKudos(AO3DB):
             self.logger.info("Table doesn't exist.")
             sys.exit()
         self.connect.commit()
+
+    def kudo_scrape_date(self, work_id: str) -> datetime:
+        cur = self.connect.cursor()
+        sql = "select kudo_scr_date from staging_meta where work_id = %s ;"
+        cur.execute(sql, (work_id,))
+        return cur.fetchone()[0]
