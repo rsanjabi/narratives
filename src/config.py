@@ -27,12 +27,14 @@ PICKLE_SUFFIX = '.pkl'
 HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
-TEST_FANDOM_LIST = ['LEGO Star Wars - All Media Types',
+TEST_FANDOM_LIST = ["LEGO Star Wars: The Padawan Menace (Short Film)"]
+'''
+    "LEGO Star Wars - All Media Types",
     "LEGO Star Wars: The Complete Saga",
     "LEGO Star Wars: The Yoda Chronicles",
     "LEGO Star Wars: Droid Tales",
     "LEGO Star Wars: The Freemaker Adventures (Cartoon)",
-    "LEGO Star Wars: The Padawan Menace (Short Film)",
+,
     "LEGO Star Wars: The Empire Strikes Out (Short Film)",
     "Phineas and Ferb: Star Wars",
     "Star Wars Legends - All Media Types",
@@ -128,6 +130,7 @@ TEST_FANDOM_LIST = ['LEGO Star Wars - All Media Types',
     "Star Wars: Adventures in Wild Space - Tom Huddleston & Cavan Scott",
     "Star Wars: The Rise of Kylo Ren (Comics)",
     "Star Wars: Galaxy's Edge (Attraction)"]
+'''
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3

@@ -12,7 +12,6 @@ class DBMeta(AO3DB):
     def __init__(self, fandom: str) -> None:
         self.meta_path: Path = paths.meta_path(fandom)
         l_path: Path = paths.meta_db_log_path(fandom)
-        self.fandom = fandom
         super().__init__(fandom, l_path, 'meta_db')
 
     def insert(self) -> None:

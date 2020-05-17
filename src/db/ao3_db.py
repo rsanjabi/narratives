@@ -15,7 +15,7 @@ class AO3DB():
                  type: str):
         self.page_kind = page_kind
         self.type = type
-        self.logger = log_path
+        self.log_path = log_path
         self.cursor, self.connect = self.open()
         self.logger = self._init_log()
         self._table_creation()
