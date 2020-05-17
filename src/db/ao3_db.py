@@ -1,8 +1,5 @@
-from abc import ABC, abstractmethod
-from typing import Generator, Any
 import os
 import sys
-import json
 
 import logging
 from logging import Logger
@@ -11,16 +8,14 @@ import psycopg2
 import config as cfg
 
 
-class AO3DB(ABC):
+class AO3DB():
 
     def __init__(self, page_kind: str,
-                 data_path: Path,
                  log_path: Path,
                  type: str):
-        self.page_kind = page_kind      # fandom or media kind
+        self.page_kind = page_kind
         self.type = type
-        self.data_path = data_path
-        self.log_path = log_path
+        self.logger = log_path
         self.cursor, self.connect = self.open()
         self.logger = self._init_log()
         self._table_creation()
@@ -46,14 +41,6 @@ class AO3DB(ABC):
         self.connect.close()
         print("Connection closed.")
 
-    @abstractmethod
-    def insert(self):
-        pass
-
-    @abstractmethod
-    def _table_creation(self):
-        pass
-
     def _init_log(self) -> Logger:
         logger = logging.getLogger(self.page_kind+self.type)
         logger.setLevel(logging.DEBUG)
@@ -64,11 +51,6 @@ class AO3DB(ABC):
         logger.info("********************************")
 
         return logger
-
-    def _rows(self) -> Generator[Any, None, None]:
-        with open(self.data_path, 'r') as f_in:
-            for row in f_in:
-                yield json.loads(row)
 
     def _fanwork_exists(self, work_id: str) -> bool:
         cur = self.connect.cursor()
