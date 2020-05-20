@@ -1,18 +1,19 @@
-import utils.paths as paths
+from typing import Generator, Any
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
 from db.ao3_db import AO3DB
+import utils.paths as paths
 
 
 class DBKudos(AO3DB):
     def __init__(self, fandom: str) -> None:
+
+        self.page_kind = fandom      # fandom or media kind
         self.kudo_path: Path = paths.kudo_path(fandom)
-        self.kudos_db_log_path: Path = paths.kudos_db_log_path(fandom)
-        super().__init__(fandom,
-                         self.kudo_path,
-                         self.kudos_db_log_path,
-                         'kudos_db')
+        l_path: Path = paths.kudos_db_log_path(fandom)
+        super().__init__(fandom, l_path, 'kudos_db')
 
     def insert(self):
         self.logger.info(f"Opening {self.kudo_path}")
@@ -52,3 +53,8 @@ class DBKudos(AO3DB):
         sql = "select kudo_scr_date from staging_meta where work_id = %s ;"
         cur.execute(sql, (work_id,))
         return cur.fetchone()[0]
+
+    def _rows(self) -> Generator[Any, None, None]:
+        with open(self.kudo_path, 'r') as f_in:
+            for row in f_in:
+                yield json.loads(row)

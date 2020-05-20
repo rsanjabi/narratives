@@ -1,18 +1,18 @@
-import utils.paths as paths
+from typing import Generator, Any
+import json
+import psycopg2
+
 from pathlib import Path
 
-import psycopg2
+import utils.paths as paths
 from db.ao3_db import AO3DB
 
 
 class DBMeta(AO3DB):
     def __init__(self, fandom: str) -> None:
         self.meta_path: Path = paths.meta_path(fandom)
-        self.meta_db_log_path: Path = paths.meta_db_log_path(fandom)
-        super().__init__(fandom,
-                         self.meta_path,
-                         self.meta_db_log_path,
-                         'meta_db')
+        l_path: Path = paths.meta_db_log_path(fandom)
+        super().__init__(fandom, l_path, 'meta_db')
 
     def insert(self) -> None:
         self.logger.info(f"Opening {self.meta_path}")
@@ -244,3 +244,8 @@ class DBMeta(AO3DB):
             self.logger.info("Table dropped")
         except Exception:
             self.logger.error("Error dropping table.")
+
+    def _rows(self) -> Generator[Any, None, None]:
+        with open(self.data_path, 'r') as f_in:
+            for row in f_in:
+                yield json.loads(row)
