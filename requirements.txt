@@ -19,7 +19,7 @@ MarkupSafe==1.1.1
 mccabe==0.6.1
 mypy==0.770
 mypy-extensions==0.4.3
--e git+https://github.com/rsanjabi/narratives.git@712594364269d75459642aae691e848146b77735#egg=narratives&subdirectory=src
+-e git+https://github.com/rsanjabi/narratives.git@69a10b3fca991c83494805b4ee254137246f43c4#egg=narratives&subdirectory=src
 numpy==1.18.4
 packaging==20.3
 pandas==1.0.3
