@@ -15,7 +15,6 @@
             folders?)
 '''
 
-import csv
 import pickle
 from typing import List, Tuple, Dict, Any
 from pathlib import Path
@@ -26,9 +25,11 @@ from logging import Logger
 import numpy as np
 import scipy.sparse as sp
 import pandas as pd
+from pandas import DataFrame
 from implicit.bpr import BayesianPersonalizedRanking as bpr_rec
 
 import utils.paths as paths
+from db.ao3_db import AO3DB     # type: ignore
 import config as cfg
 
 
@@ -57,7 +58,7 @@ def create_path_list() -> Tuple[List[Path], List[Path]]:
     return kudo_files, meta_files
 
 
-def create_megaframe(kudo_files: List[Path]) -> pd.Dataframe:
+def create_megaframe(kudo_files: List[Path]) -> DataFrame:
     # Create mega dataframe
 
     frames = []
@@ -67,10 +68,11 @@ def create_megaframe(kudo_files: List[Path]) -> pd.Dataframe:
     return df
 
 
-def create_empty_df(df: pd.Dataframe) -> np.ndarray:
+def create_empty_df(df: DataFrame) -> np.ndarray:
     # Determine unique work and user sizes to make emtpy DF
     num_works = len(df['work_id'].unique())
-    num_users = len(df['user'].unique())
+    num_users = len(df['kudo_givers'].unique())
+    print(f"Debug: {num_works} num_users: {num_users}")
     data = np.zeros((num_works, num_users))
     return data
 
@@ -85,19 +87,15 @@ def invert_indices(indices: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def create_sparse_matrix(data: np.ndarray,
-                         kudo_files) -> Tuple[np.ndarray, Dict[Any, Any]]:
+                         kudo_df) -> Tuple[np.ndarray, Dict[Any, Any]]:
     # create indices for work_id and users
     indices: Dict[str, Any] = {'work_id': {}, 'user': {}}
 
     # then go through each line of csv files for values to set to 1
-    for fandom in kudo_files:
-        with open(fandom, newline='') as csvfile:
-            interactions = csv.reader(csvfile, delimiter=',')
-            next(interactions)
-            for row in interactions:
-                indices['work_id'].setdefault(row[0], len(indices['work_id']))
-                indices['user'].setdefault(row[1], len(indices['user']))
-                data[indices['work_id'][row[0]]][indices['user'][row[1]]] = 1
+    for _, row in kudo_df.iterrows():
+        indices['work_id'].setdefault(row['work_id'], len(indices['work_id']))
+        indices['user'].setdefault(row['kudo_givers'], len(indices['user']))
+        data[indices['work_id'][row['work_id']]][indices['user'][row['kudo_givers']]] = 1   # noqa: E501
     return data, indices
 
 
@@ -116,7 +114,7 @@ def test_predictions(indices: Dict[Any, Any],
 
 def store_data(model: bpr_rec,
                indices: Dict[Any, Any],
-               meta_df: pd.Dataframe) -> None:
+               meta_df: DataFrame) -> None:
     # Write out model and indices dictionary as pkl files
     # Write out lookup_table/meta_df as csv file
     # All three will be used for infererncing
@@ -135,26 +133,35 @@ def store_data(model: bpr_rec,
 
 if __name__ == "__main__":
     logger = create_logger()
-    kudo_list, meta_list = create_path_list()
+    # kudo_list, meta_list = create_path_list()
 
-    kudo_df = create_megaframe(kudo_list)
-    meta_df = create_megaframe(meta_list)
+    db = AO3DB('george', paths.matrix_log_path())
+    kudo_df = db.kudo_matrix()
+    # kudo_df = create_megaframe(kudo_list)
+    # meta_df = create_megaframe(meta_list)
+    meta_df = DataFrame()
 
     logger.info("Reading in kudos.")
+    print("Reading in kudos.")
     empty_df = create_empty_df(kudo_df)
 
     logger.info("Creating empty matrix.")
-    data, indices = create_sparse_matrix(empty_df, kudo_list)
+    print("Creating empty matrix.")
+    data, indices = create_sparse_matrix(empty_df, kudo_df)
     logger.info(f" completed size: {data.shape}")
+    print(f"completed size: {data.shape}")
 
     # train the model on a sparse matrix of item/user/confidence weights
     logger.info("Training model")
+    print("Training model")
     modelBPR = bpr_rec(factors=50, verify_negative_samples=True)
     modelBPR.fit(sp.csr_matrix(data))
 
     # test_predictions(indices, invert_indices(indices), '13484820')
 
     logger.info("Storing model for late inference.")
+    print("Storing model for late inference.")
     store_data(modelBPR, indices, meta_df)
 
     logger.info("Model building and features engineering complete.")
+    print("Model building and features engineering complete.")
