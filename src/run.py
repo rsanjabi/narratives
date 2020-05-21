@@ -5,8 +5,8 @@
 '''
 from scrape.meta import Meta
 from scrape.kudos import Kudos
-from db.meta_db import DBMeta       # type: ignore
-from db.kudos_db import DBKudos     # type: ignore
+from db.insert_meta import DBMeta       # type: ignore
+from db.insert_kudos import DBKudos     # type: ignore
 import config as cfg
 
 for fandom in cfg.TEST_FANDOM_LIST:

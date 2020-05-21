@@ -60,10 +60,10 @@ def kudos_db_log_path(fandom: str) -> Path:
 
 
 def matrix_log_path() -> Path:
-    path = Path() / cfg.DATA_PATH
+    path = Path() / cfg.MODEL_PATH
     if not path.exists():
         path.mkdir(parents=True)
-    return path.joinpath(cfg.META_PREFIX + cfg.LOG_SUFFIX)
+    return path.joinpath(cfg.MODEL_PREFIX + cfg.LOG_SUFFIX)
 
 
 def model_log_path() -> Path:

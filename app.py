@@ -2,12 +2,12 @@
 from flask import Flask, request, render_template
 import pickle
 from markupsafe import Markup
-import pandas as pd
+from db.ao3_db import AO3DB     # type: ignore
+import utils.paths as path
+# import pandas as pd
 
 app = Flask(__name__)
-
 # Put model and lookup stuff in it's own library TODO
-
 NUM_TO_RETURN = 20
 
 
@@ -21,20 +21,24 @@ def get_meta(work_id):
     for work in related_BPR:
         # Find fanwork ID from matrix indices
         suggested_id = inverted_indices['work_id'][work[0]]
-        meta = df_meta.loc[df_meta['work_id'] == int(suggested_id)]
-        title = meta['title'].values[0]
-        rating = meta['rating'].values[0]
+        print(suggested_id)
+        meta = ao3_db.fanwork_select(suggested_id)
+        print(type(meta))
+        print(meta)
+        title = meta[1]
+        rating = meta[4]
         yield suggested_id, title, rating
 
 
 def validate(request):
     try:
         fanwork_id = [int(x) for x in request.form.values()][0]
+        fanwork_id = str(fanwork_id)
     except ValueError:
         raise ValueError("Enter a number as fanwork ID")
         return
 
-    if (df_meta['work_id'] == fanwork_id).any():
+    if ao3_db.fanwork_exists(fanwork_id):
         return fanwork_id
     else:
         raise ValueError('FanWork ID not in current recommendation system')
@@ -45,14 +49,16 @@ def load__model():
     global model
     global indices
     global inverted_indices
-    global df_meta
+    # global df_meta
+    global ao3_db
+
+    ao3_db = AO3DB("inference_log", path.matrix_log_path())
 
     model = pickle.load(open('models/implicit.pkl', 'rb'))
     indices = pickle.load(open('models/indices.pkl', 'rb'))
     inverted_indices = {'work_id': {}, 'user': {}}
     inverted_indices['work_id'] = {v: k for k, v in indices['work_id'].items()}
     inverted_indices['user'] = {v: k for k, v in indices['user'].items()}
-    df_meta = pd.read_csv('models/meta.csv')
 
 
 @app.route('/')

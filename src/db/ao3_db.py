@@ -1,6 +1,7 @@
 import os
 import sys
-
+import pandas as pd
+from pandas import DataFrame
 import logging
 from logging import Logger
 from pathlib import Path
@@ -10,15 +11,12 @@ import config as cfg
 
 class AO3DB():
 
-    def __init__(self, page_kind: str,
-                 log_path: Path,
-                 type: str):
-        self.page_kind = page_kind
-        self.type = type
+    def __init__(self, log_name: str,
+                 log_path: Path):
+        self.log_name = log_name
         self.log_path = log_path
         self.cursor, self.connect = self.open()
         self.logger = self._init_log()
-        self._table_creation()
 
     def open(self):
         ''' Open database connection. Returns cursor and connection '''
@@ -42,18 +40,33 @@ class AO3DB():
         print("Connection closed.")
 
     def _init_log(self) -> Logger:
-        logger = logging.getLogger(self.page_kind+self.type)
+        logger = logging.getLogger(self.log_name)
         logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler(self.log_path, mode='a')
         formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(message)s')
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         logger.info("********************************")
-
         return logger
 
-    def _fanwork_exists(self, work_id: str) -> bool:
+    def fanwork_exists(self, work_id: str) -> bool:
         cur = self.connect.cursor()
         sql = "SELECT EXISTS (SELECT 1 FROM staging_meta WHERE work_id = %s);"
         cur.execute(sql, (work_id,))
         return cur.fetchone()[0]
+
+    def fanwork_select(self, work_id: str) -> str:
+        cur = self.connect.cursor()
+        sql = "SELECT * FROM staging_meta WHERE work_id = %s;"
+        cur.execute(sql, (work_id,))
+        return cur.fetchone()
+
+    def kudo_matrix(self) -> DataFrame:
+        sql = """
+              SELECT work_id, kudo_givers
+              FROM staging_meta
+              WHERE kudo_givers is not Null;
+              """
+        data = pd.read_sql_query(sql, self.connect)
+        df = data.explode('kudo_givers')
+        return df
