@@ -82,7 +82,7 @@ class AO3DB():
         sql = """
                 SELECT work_id FROM staging_meta
                 WHERE kudo_scr_date is null
-                ORDER BY updated ASC
+                ORDER BY random()
                 LIMIT %s;
             """
         cur = self.connect.cursor()

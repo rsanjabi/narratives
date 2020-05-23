@@ -28,17 +28,18 @@ except Exception as e:
     print(f"Ran into problem inserting meta with {fandom}: {e}")
 '''
 
-print("Starting to scrape kudos.")
-k = Kudos()
-k.scrape()
-print("Finished scraping kudos")
+for _ in range(24):
+    print("Starting to scrape kudos.")
+    k = Kudos(num_batches=1, batch_size=500)
+    k.scrape()
+    print("Finished scraping kudos")
 
-print("Inserting kudos into database.")
-db = DBKudos(0)
-db.insert()
-print("Finished inserting kudos for")
+    print("Inserting kudos into database.")
+    db = DBKudos()
+    db.insert()
+    print("Finished inserting kudos.")
 
-print("Done scraping")
+    print("Done one batch")
 
 
-print("Done scraping list.")
+print("Done scraping and inserting kudos.")

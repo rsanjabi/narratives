@@ -1,9 +1,23 @@
+from typing import Optional
 from pathvalidate import replace_symbol
 from pathlib import Path
 import config as cfg
 
 
-def kudo_log_path() -> object:
+def oldest_kudo_path() -> Optional[Path]:
+    try:
+        p = Path() / cfg.KUDO_PATH
+        oldest = sorted(p.glob('*.json'), key=lambda x: x.stat().st_ctime)[0]
+        return oldest
+    except IndexError:
+        return None
+
+
+def remove_kudo_path(path: Path):
+    path.unlink()
+
+
+def kudo_log_path() -> Path:
     path = Path() / cfg.KUDO_PATH
     if not path.exists():
         path.mkdir(parents=True)
