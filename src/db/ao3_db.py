@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime, timedelta
 import pandas as pd
 from pandas import DataFrame
 import logging
@@ -11,8 +12,7 @@ import config as cfg
 
 class AO3DB():
 
-    def __init__(self, log_name: str,
-                 log_path: Path):
+    def __init__(self, log_name: str, log_path: Path):
         self.log_name = log_name
         self.log_path = log_path
         self.cursor, self.connect = self.open()
@@ -62,6 +62,7 @@ class AO3DB():
         return cur.fetchone()
 
     def kudo_matrix(self) -> DataFrame:
+        # Kudos to dataframe
         sql = """
               SELECT work_id, kudo_givers
               FROM staging_meta
@@ -70,3 +71,27 @@ class AO3DB():
         data = pd.read_sql_query(sql, self.connect)
         df = data.explode('kudo_givers')
         return df
+
+    def kudo_scrape_date(self, work_id: str) -> datetime:
+        cur = self.connect.cursor()
+        sql = "select kudo_scr_date from staging_meta where work_id = %s ;"
+        cur.execute(sql, (work_id,))
+        return cur.fetchone()[0]
+
+    def missing_kudos(self, batch_size: str):
+        sql = """
+                SELECT work_id FROM staging_meta
+                WHERE kudo_scr_date is null
+                ORDER BY updated ASC
+                LIMIT %s;
+            """
+        cur = self.connect.cursor()
+        cur.execute(sql, (int(batch_size),))
+        for _ in range(int(batch_size)):
+            yield cur.fetchone()[0]
+
+    def _recently_updated(self, work_id: str) -> bool:
+        scr_date = self.kudo_scrape_date(work_id)
+        if scr_date is None:
+            return False
+        return (scr_date > (datetime.now()-timedelta(cfg.SCR_WINDOW)))

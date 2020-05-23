@@ -9,15 +9,17 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 DELAY = 5
 
 # Location of raw data dumps. Fandom subdirectories will be located here
-DATA_PATH = '../data/raw/'
+META_PATH = '../data/meta/'
+KUDO_PATH = '../data/kudos/'
+FANDOM_PATH = '../data/fandom/'
+
 MODEL_PATH = '../models/'
 
+PROGRESS_TRACK = '.state'
 INDICES_PREFIX = 'indices'
 MODEL_PREFIX = 'implicit'
 KUDO_PREFIX = 'kudos'
 META_PREFIX = 'meta'
-META_DB_PREFIX = 'meta_db'
-KUDOS_DB_PREFIX = 'kudos_db'
 
 LOG_SUFFIX = '.log'
 DATA_SUFFIX = '.json'
@@ -27,7 +29,7 @@ PICKLE_SUFFIX = '.pkl'
 HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
-TEST_FANDOM_LIST = ["LEGO Star Wars: The Padawan Menace (Short Film)"]
+TEST_FANDOM_LIST = ["Star Wars Prequel Trilogy"]
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3

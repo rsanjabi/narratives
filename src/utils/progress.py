@@ -16,14 +16,15 @@ import os
 from typing import Tuple
 import datetime
 from pathlib import Path
+import config as cfg
 
 
 class Progress():
 
-    def __init__(self, fandom_path: Path, type: str):
+    def __init__(self, tag_path: Path):
 
         self.unscraped_flag = '-1'   # constant for when unscraped
-        self.file_path = fandom_path.joinpath('.' + type)
+        self.file_path = tag_path.joinpath(cfg.PROGRESS_TRACK)
         date = datetime.datetime.now().strftime("%d/%b/%Y %H:%M")
 
         if os.path.exists(self.file_path) is False:
