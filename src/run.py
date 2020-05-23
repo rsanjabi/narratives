@@ -7,25 +7,25 @@
 from scrape.kudos import Kudos
 # from db.insert_meta import DBMeta       # type: ignore
 from db.insert_kudos import DBKudos     # type: ignore
-import config as cfg
+# import config as cfg
 
 # for fandom in cfg.TEST_FANDOM_LIST:
-    '''
-    print(f"Starting to scrape {fandom} meta.")
-    try:
-        m = Meta(fandom, from_top=False)
-        m.scrape()
-        print(f"Finished scraping meta for : {fandom}")
-    except Exception as e:
-        print(f"Ran into meta problem with {fandom}: {e}")
+'''
+print(f"Starting to scrape {fandom} meta.")
+try:
+    m = Meta(fandom, from_top=False)
+    m.scrape()
+    print(f"Finished scraping meta for : {fandom}")
+except Exception as e:
+    print(f"Ran into meta problem with {fandom}: {e}")
 
-    print(f"Inserting {fandom} meta into database.")
-    try:
-        db = DBMeta(fandom)
-        db.insert()
-        print(f"Finished inserting meta for : {fandom}")
-    except Exception as e:
-        print(f"Ran into problem inserting meta with {fandom}: {e}")
+print(f"Inserting {fandom} meta into database.")
+try:
+    db = DBMeta(fandom)
+    db.insert()
+    print(f"Finished inserting meta for : {fandom}")
+except Exception as e:
+    print(f"Ran into problem inserting meta with {fandom}: {e}")
 '''
 
 print("Starting to scrape kudos.")
