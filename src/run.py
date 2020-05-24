@@ -28,17 +28,18 @@ except Exception as e:
     print(f"Ran into problem inserting meta with {fandom}: {e}")
 '''
 
-for _ in range(24):
+k = Kudos(num_batches=1, batch_size=100)
+db = DBKudos()
+
+for _ in range(100):
     try:
         print("Starting to scrape kudos.")
-        k = Kudos(num_batches=1, batch_size=100)
         k.scrape()
         print("Finished scraping kudos")
     except Exception as e:
         print(f"Ran into a problem: {e}")
 
     print("Inserting kudos into database.")
-    db = DBKudos()
     db.insert()
     print("Finished inserting kudos.")
 

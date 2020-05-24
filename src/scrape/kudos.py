@@ -2,7 +2,7 @@
 import time
 from datetime import datetime
 import json
-from typing import List
+from typing import List, Optional
 from mypy_extensions import TypedDict
 
 from bs4 import BeautifulSoup
@@ -36,31 +36,30 @@ class Kudos(Page):
             with open(batch_path, 'w') as f_out:
                 for work_id in kudo_list:
                     page = self._pages(work_id)
-                    kudos = self._page_elements(page, work_id)
-                    f_out.write(json.dumps(kudos)+'\n')
-            self.logger.info(f'scraped {i} batch')
+                    if page is not None:
+                        kudos = self._page_elements(page, work_id)
+                        f_out.write(json.dumps(kudos)+'\n')
+                        self.logger.info(f'Scraped: {work_id}')
+            self.logger.info(f'Scraped batch: {i+1}')
         return
 
-    def _pages(self, work_id: str) -> BeautifulSoup:
+    def _pages(self, work_id: str) -> Optional[BeautifulSoup]:
 
         url = self.base_url + work_id + '/kudos'
         errors = 0
-
         while errors < cfg.MAX_ERRORS:
             try:
                 time.sleep(cfg.DELAY)
                 soup = self._get_soup(url)
             except HTTPError:
                 self.logger.info(f"HTTPError: {work_id}")
-                errors += 1
-                time.sleep(cfg.DELAY*errors*10)    # Increase sleep time
-            # except 404 error:
-            #   print work_id to tbdeleted log
+                with open(paths.works_to_delete(), 'a') as f_out:
+                    f_out.write(work_id+'\n')
+                    return None
             except ConnectTimeout:
                 self.logger.error(f"ConnectionTimeout on: {work_id}")
-                self.logger.error(f"{cfg.MAX_ERRORS-errors} errors left.")
                 errors += 1
-                time.sleep(cfg.DELAY*errors*10)    # Increase sleep time
+                time.sleep(cfg.MAX_ERRORS*errors)
             else:
                 return soup
         return None

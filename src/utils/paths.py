@@ -31,6 +31,13 @@ def kudo_path(batch: str) -> Path:
     return path.joinpath(batch + cfg.DATA_SUFFIX)
 
 
+def works_to_delete() -> Path:
+    path = Path() / cfg.DATA_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath(cfg.TBD_PREFIX + cfg.TXT_SUFFIX)
+
+
 def tag_path(tag: str) -> Path:
     tag_dir = replace_symbol(tag)
     path = Path() / cfg.META_PATH / tag_dir
