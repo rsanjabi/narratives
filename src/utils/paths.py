@@ -38,6 +38,13 @@ def works_to_delete() -> Path:
     return path.joinpath(cfg.TBD_PREFIX + cfg.TXT_SUFFIX)
 
 
+def fandom_log_path() -> Path:
+    path = Path() / cfg.FANDOM_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    return path.joinpath('fandoms' + cfg.LOG_SUFFIX)
+
+
 def tag_path(tag: str) -> Path:
     tag_dir = replace_symbol(tag)
     path = Path() / cfg.META_PATH / tag_dir
