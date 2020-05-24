@@ -13,14 +13,18 @@ META_PATH = '../data/meta/'
 KUDO_PATH = '../data/kudos/'
 FANDOM_PATH = '../data/fandom/'
 
+DATA_PATH = '../data/'
+
 MODEL_PATH = '../models/'
 
+TBD_PREFIX = 'tbdeleted'
 PROGRESS_TRACK = '.state'
 INDICES_PREFIX = 'indices'
 MODEL_PREFIX = 'implicit'
 KUDO_PREFIX = 'kudos'
 META_PREFIX = 'meta'
 
+TXT_SUFFIX = '.txt'
 LOG_SUFFIX = '.log'
 DATA_SUFFIX = '.json'
 PICKLE_SUFFIX = '.pkl'
