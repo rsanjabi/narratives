@@ -12,11 +12,14 @@ import config as cfg
 
 class AO3DB():
 
-    def __init__(self, log_name: str, log_path: Path):
+    def __init__(self, log_name: str, log_path: Path, logger=None):
         self.log_name = log_name
         self.log_path = log_path
         self.cursor, self.connect = self.open()
-        self.logger = self._init_log()
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = self._init_log()
 
     def open(self):
         ''' Open database connection. Returns cursor and connection '''

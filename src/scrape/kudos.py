@@ -26,10 +26,10 @@ class Kudos(Page):
         self.batch_size = batch_size
         self.log_path = paths.kudo_log_path()
         self.base_url = ('https://archiveofourown.org/works/')
-        super().__init__('kudos', self.log_path)
+        super().__init__('kudo', self.log_path)
 
     def scrape(self) -> None:
-        db = AO3DB('kudos', self.log_path)
+        db = AO3DB('kudo', self.log_path, self.logger)
         for i in range(self.num_batches):
             kudo_list = db.missing_kudos(self.batch_size)
             batch_path = paths.kudo_path(time.strftime("%Y%m%d-%H%M%S"))

@@ -29,10 +29,13 @@ except Exception as e:
 '''
 
 for _ in range(24):
-    print("Starting to scrape kudos.")
-    k = Kudos(num_batches=1, batch_size=500)
-    k.scrape()
-    print("Finished scraping kudos")
+    try:
+        print("Starting to scrape kudos.")
+        k = Kudos(num_batches=1, batch_size=100)
+        k.scrape()
+        print("Finished scraping kudos")
+    except Exception as e:
+        print(f"Ran into a problem: {e}")
 
     print("Inserting kudos into database.")
     db = DBKudos()
