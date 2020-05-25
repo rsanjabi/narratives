@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from pathvalidate import replace_symbol
 from pathlib import Path
@@ -43,6 +44,14 @@ def fandom_log_path() -> Path:
     if not path.exists():
         path.mkdir(parents=True)
     return path.joinpath('fandoms' + cfg.LOG_SUFFIX)
+
+
+def fandom_path() -> Path:
+    path = Path() / cfg.FANDOM_PATH
+    if not path.exists():
+        path.mkdir(parents=True)
+    date = datetime.now().strftime("%d%b%Y")
+    return path.joinpath(date + cfg.DATA_SUFFIX)
 
 
 def tag_path(tag: str) -> Path:

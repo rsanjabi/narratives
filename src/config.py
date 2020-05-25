@@ -6,7 +6,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Wait time between AO3 requests in seconds
-DELAY = 5
+DELAY = 10
 
 # Location of raw data dumps. Fandom subdirectories will be located here
 META_PATH = '../data/meta/'
@@ -48,13 +48,15 @@ META_COLS = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
 
 SCR_WINDOW = 21          # window for number of days before we rescrape kudos
 
-FANDOM_PAGES = ['https://archiveofourown.org/media/Anime%20*a*%20Manga/fandoms',
-                'https://archiveofourown.org/media/Books%20*a*%20Literature/fandoms',
-                'https://archiveofourown.org/media/Cartoons%20*a*%20Comics%20*a*%20Graphic%20Novels/fandoms',
-                'https://archiveofourown.org/media/Celebrities%20*a*%20Real%20People/fandoms',
-                'https://archiveofourown.org/media/Movies/fandoms',
-                'https://archiveofourown.org/media/Music%20*a*%20Bands/fandoms',
+FANDOM_PAGES = ['https://archiveofourown.org/media/Movies/fandoms']
+"""
+    'https://archiveofourown.org/media/Anime%20*a*%20Manga/fandoms'],            # noqa: E501
+                'https://archiveofourown.org/media/Books%20*a*%20Literature/fandoms',       # noqa: E501
+                'https://archiveofourown.org/media/Cartoons%20*a*%20Comics%20*a*%20Graphic%20Novels/fandoms',   # noqa: E501
+                'https://archiveofourown.org/media/Celebrities%20*a*%20Real%20People/fandoms',  # noqa: E501
+                'https://archiveofourown.org/media/Music%20*a*%20Bands/fandoms',            # noqa: E501
                 'https://archiveofourown.org/media/Other%20Media/fandoms',
                 'https://archiveofourown.org/media/Theater/fandoms',
                 'https://archiveofourown.org/media/TV%20Shows/fandoms',
                 'https://archiveofourown.org/media/Video%20Games/fandoms']
+"""
