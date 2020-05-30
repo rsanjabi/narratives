@@ -38,7 +38,6 @@ class Fandoms(Page):
     def _pages(self) -> Generator[Path, None, None]:
         for i, page in enumerate(cfg.FANDOM_PAGES):
             yield page
-            print(i)
             time.sleep(cfg.DELAY)
 
     def _page_elements(self,
@@ -54,5 +53,6 @@ class Fandoms(Page):
 
                 yield {
                     "name": fandom,
-                    "total": {"date": date, "count": count}
+                    "date": date,
+                    "count": count
                 }
