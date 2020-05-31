@@ -6,7 +6,7 @@
 
 
 from scrape.fandoms import Fandoms
-from db.insert_fandoms import DBFandoms
+from db.insert_fandoms import DBFandoms     # type: ignore
 
 # from scrape.meta import Meta
 # from scrape.kudos import Kudos

@@ -8,7 +8,7 @@ from typing import Generator, Any, List
 from scrape.page import Page
 import utils.paths as paths
 import config as cfg
-from db.ao3_db import AO3DB
+from db.ao3_db import AO3DB         # type: ignore
 
 
 class Fandoms(Page):
