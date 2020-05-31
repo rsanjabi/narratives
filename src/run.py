@@ -9,9 +9,9 @@ from scrape.fandoms import Fandoms
 from db.insert_fandoms import DBFandoms
 
 # from scrape.meta import Meta
-from scrape.kudos import Kudos
+# from scrape.kudos import Kudos
 # from db.insert_meta import DBMeta       # type: ignore
-from db.insert_kudos import DBKudos     # type: ignore
+# from db.insert_kudos import DBKudos     # type: ignore
 # import config as cfg
 
 scraper = Fandoms()
@@ -19,9 +19,6 @@ fandom_list = scraper.scrape()
 
 db_obj = DBFandoms()
 db_obj.insert(fandom_list)
-
-
-
 
 # for fandom in cfg.TEST_FANDOM_LIST:
 '''

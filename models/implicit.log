@@ -1,5 +1,5 @@
-2020-05-20 16:34:50,766-INFO-Reading in kudos.
-2020-05-20 16:34:51,214-INFO-Creating empty matrix.
-2020-05-20 16:39:32,341-INFO- completed size: (23220, 89040)
-2020-05-20 16:39:32,356-INFO-Training model
-2020-05-20 16:49:12,531-INFO-Storing model for late inference.
+2020-05-30 17:20:47,638-INFO-Reading in kudos.
+2020-05-30 17:20:48,141-INFO-Creating empty matrix.
+2020-05-30 17:29:13,340-INFO- completed size: (30061, 94505)
+2020-05-30 17:29:13,350-INFO-Training model
+2020-05-30 17:34:00,049-INFO-Storing model for late inference.
