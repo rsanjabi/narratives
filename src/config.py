@@ -6,19 +6,25 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Wait time between AO3 requests in seconds
-DELAY = 5
+DELAY = 10
 
 # Location of raw data dumps. Fandom subdirectories will be located here
-DATA_PATH = '../data/raw/'
+META_PATH = '../data/meta/'
+KUDO_PATH = '../data/kudos/'
+FANDOM_PATH = '../data/fandoms/'
+
+DATA_PATH = '../data/'
+
 MODEL_PATH = '../models/'
 
+TBD_PREFIX = 'tbdeleted'
+PROGRESS_TRACK = '.state'
 INDICES_PREFIX = 'indices'
 MODEL_PREFIX = 'implicit'
 KUDO_PREFIX = 'kudos'
 META_PREFIX = 'meta'
-META_DB_PREFIX = 'meta_db'
-KUDOS_DB_PREFIX = 'kudos_db'
 
+TXT_SUFFIX = '.txt'
 LOG_SUFFIX = '.log'
 DATA_SUFFIX = '.json'
 PICKLE_SUFFIX = '.pkl'
@@ -27,7 +33,7 @@ PICKLE_SUFFIX = '.pkl'
 HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
-TEST_FANDOM_LIST = ["LEGO Star Wars: The Padawan Menace (Short Film)"]
+TEST_FANDOM_LIST = ["Star Wars Prequel Trilogy"]
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3
@@ -41,3 +47,16 @@ META_COLS = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
              'series_part', 'series_name', 'updated', 'scrape_date']
 
 SCR_WINDOW = 21          # window for number of days before we rescrape kudos
+
+FANDOM_PAGES = ['https://archiveofourown.org/media/Movies/fandoms']
+"""
+    'https://archiveofourown.org/media/Anime%20*a*%20Manga/fandoms'],            # noqa: E501
+                'https://archiveofourown.org/media/Books%20*a*%20Literature/fandoms',       # noqa: E501
+                'https://archiveofourown.org/media/Cartoons%20*a*%20Comics%20*a*%20Graphic%20Novels/fandoms',   # noqa: E501
+                'https://archiveofourown.org/media/Celebrities%20*a*%20Real%20People/fandoms',  # noqa: E501
+                'https://archiveofourown.org/media/Music%20*a*%20Bands/fandoms',            # noqa: E501
+                'https://archiveofourown.org/media/Other%20Media/fandoms',
+                'https://archiveofourown.org/media/Theater/fandoms',
+                'https://archiveofourown.org/media/TV%20Shows/fandoms',
+                'https://archiveofourown.org/media/Video%20Games/fandoms']
+"""

@@ -3,14 +3,15 @@ import time
 import datetime
 from typing import Generator, List, Tuple, Any, Optional, Dict
 from mypy_extensions import TypedDict
+import json
 
 from urllib.parse import quote
 from bs4 import BeautifulSoup
-# from unidecode import unidecode
 from requests.exceptions import ConnectTimeout, HTTPError
 
 from scrape.page import Page
 import utils.paths as paths
+from utils.progress import Progress
 import config as cfg
 
 MetaJson = TypedDict('MetaJson', {
@@ -43,18 +44,35 @@ MetaJson = TypedDict('MetaJson', {
 
 class Meta(Page):
 
-    def __init__(self, fandom: str, from_top: bool = True):
-        self.log_path = paths.meta_log_path(fandom)
-        self.meta_path = paths.meta_path(fandom)
-        url = (f'https://archiveofourown.org/tags/'
-               f'{quote(fandom).replace(".", "*d*")}/works?page=')
-        super().__init__(fandom, 'meta',
-                         self.log_path,
-                         self.meta_path,
-                         url,
-                         from_top)
+    def __init__(self, tag: str, from_top: bool = True):
+        self.base_url = (f'https://archiveofourown.org/tags/'
+                         f'{quote(tag).replace(".", "*d*")}/works?page=')
+        tag_path = paths.tag_path(tag)
+        self.progress = Progress(tag_path)
+        self.last = self.progress.read()[0]
 
-    def scrape(self):
+        self.path = paths.meta_path(tag)
+        log_path = paths.meta_log_path(tag)
+        super().__init__(tag+'_meta', log_path)
+
+        self.from_top = self._start_from_top(from_top)
+
+    def scrape(self) -> None:
+
+        if self.from_top is True or self.path.is_file() is False:
+            mode = 'w'
+        else:
+            mode = 'a'
+
+        with open(self.path, mode) as f_out:
+            pages = self._pages()
+            for page, progress_num in pages:
+                page_elements = self._page_elements(page)
+                for element in page_elements:
+                    f_out.write(json.dumps(element)+'\n')
+                self.progress.write(progress_num)
+        self.logger.info(f'Completed scraping "{self.page_kind}"')
+        return
         super().scrape()
 
     def _pages(self) -> Generator[Tuple[BeautifulSoup, str], None, None]:
@@ -276,3 +294,17 @@ class Meta(Page):
         except AttributeError:
             part, s_name = None, None
         return part, s_name
+
+    def _start_from_top(self, from_top: bool) -> bool:
+
+        if from_top is True:
+            self.logger.info("Scraping from the top.")
+            return True
+        elif self.last == self.progress.unscraped_flag:
+            self.logger.info(
+                f"Last scraped unknown: {self.progress.unscraped_flag}. "
+                f"Scraping from the top.")
+            return True
+        else:
+            self.logger.info(f"Picking up from {self.last} ")
+            return False
