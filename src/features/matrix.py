@@ -72,7 +72,7 @@ def create_empty_df(df: DataFrame) -> np.ndarray:
     # Determine unique work and user sizes to make emtpy DF
     num_works = len(df['work_id'].unique())
     num_users = len(df['kudo_givers'].unique())
-    print(f"Debug: {num_works} num_users: {num_users}")
+    # TODO add size to log
     data = np.zeros((num_works, num_users))
     return data
 

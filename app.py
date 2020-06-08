@@ -21,10 +21,7 @@ def get_meta(work_id):
     for work in related_BPR:
         # Find fanwork ID from matrix indices
         suggested_id = inverted_indices['work_id'][work[0]]
-        print(suggested_id)
         meta = ao3_db.fanwork_select(suggested_id)
-        print(type(meta))
-        print(meta)
         title = meta[1]
         rating = meta[4]
         yield suggested_id, title, rating
