@@ -7,7 +7,7 @@ import utils.paths as path
 # import pandas as pd
 
 app = Flask(__name__)
-# Put model and lookup stuff in it's own library TODO
+# Put model and lookup stuff in it's own library
 NUM_TO_RETURN = 20
 
 
@@ -49,7 +49,6 @@ def load__model():
     global model
     global indices
     global inverted_indices
-    # global df_meta
     global ao3_db
 
     ao3_db = AO3DB("inference_log", path.matrix_log_path())
