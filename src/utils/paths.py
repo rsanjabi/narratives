@@ -76,6 +76,7 @@ def matrix_log_path() -> Path:
     path = Path() / cfg.MODEL_PATH
     if not path.exists():
         path.mkdir(parents=True)
+    print(f"DEBUG path.py: {path}")
     return path.joinpath(cfg.MODEL_PREFIX + cfg.LOG_SUFFIX)
 
 

@@ -15,7 +15,7 @@ FANDOM_PATH = '../data/fandoms/'
 
 DATA_PATH = '../data/'
 
-MODEL_PATH = '../models/'
+MODEL_PATH = 'models/'
 
 TBD_PREFIX = 'tbdeleted'
 PROGRESS_TRACK = '.state'
