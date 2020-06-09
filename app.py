@@ -48,8 +48,10 @@ def load__model():
     global inverted_indices
     global ao3_db
 
-    print("******************************")
-    ao3_db = AO3DB("inference_log", "models/implicit.log")
+    try:
+        ao3_db = AO3DB("inference_log", "models/implicit.log")
+    except Exception as e:
+        print(f"ERROR in app.py: {e}")
 
     model = pickle.load(open('models/implicit.pkl', 'rb'))
     indices = pickle.load(open('models/indices.pkl', 'rb'))
