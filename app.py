@@ -48,6 +48,7 @@ def load__model():
     global inverted_indices
     global ao3_db
 
+    print("******************************")
     ao3_db = AO3DB("inference_log", path.matrix_log_path())
 
     model = pickle.load(open('models/implicit.pkl', 'rb'))
