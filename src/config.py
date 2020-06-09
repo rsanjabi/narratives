@@ -13,7 +13,7 @@ META_PATH = 'data/meta/'        # '../data/meta/'
 KUDO_PATH = 'data/kudos/'       # '../data/kudos/'
 FANDOM_PATH = 'data/fandoms/'   # '../data/fandoms/'
 
-DATA_PATH = 'data/'                    #'../data/'
+DATA_PATH = 'data/'             # '../data/'
 
 MODEL_PATH = 'models/'
 
