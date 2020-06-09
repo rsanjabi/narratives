@@ -49,7 +49,7 @@ def load__model():
     global ao3_db
 
     print("******************************")
-    ao3_db = AO3DB("inference_log", path.matrix_log_path())
+    ao3_db = AO3DB("inference_log", "models/implicit.log")
 
     model = pickle.load(open('models/implicit.pkl', 'rb'))
     indices = pickle.load(open('models/indices.pkl', 'rb'))
