@@ -16,10 +16,13 @@ class AO3DB():
         self.log_name = log_name
         self.log_path = log_path
         self.cursor, self.connect = self.open()
+        """
         if logger is not None:
             self.logger = logger
         else:
             self.logger = self._init_log()
+        """
+        self.logger = None
 
     def open(self):
         ''' Open database connection. Returns cursor and connection '''
