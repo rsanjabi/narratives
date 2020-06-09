@@ -9,13 +9,13 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 DELAY = 10
 
 # Location of raw data dumps. Fandom subdirectories will be located here
-META_PATH = 'data/meta/'        # '../data/meta/'
-KUDO_PATH = 'data/kudos/'       # '../data/kudos/'
-FANDOM_PATH = 'data/fandoms/'   # '../data/fandoms/'
+META_PATH = '../data/meta/'
+KUDO_PATH = '../data/kudos/'
+FANDOM_PATH = '../data/fandoms/'
 
-DATA_PATH = 'data/'             # '../data/'
+DATA_PATH = '../data/'
 
-MODEL_PATH = 'models/'
+MODEL_PATH = basedir + '/../models/'
 
 TBD_PREFIX = 'tbdeleted'
 PROGRESS_TRACK = '.state'
