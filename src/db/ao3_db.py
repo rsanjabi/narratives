@@ -69,26 +69,12 @@ class AO3DB():
 
     def kudo_matrix(self) -> DataFrame:
         # Kudos to dataframe
-        '''
         sql = """
               SELECT work_id, kudo_givers
               FROM staging_meta
               WHERE kudo_givers is not Null;
               """
-        '''
-        sql2 = """
-        SELECT work_id, kudo_givers
-        FROM staging_meta
-        WHERE kudo_givers is not Null
-        AND ('Star Wars: The Clone Wars (2008) - All Media Types' = ANY(fandom)
-        OR 'Star Wars Prequel Trilogy' = ANY (fandom)
-        OR 'Star Wars: Rebellion Era - All Media Types' = ANY(fandom)
-        OR 'Star Wars: Rebels' = ANY(fandom)
-        OR 'Star Wars: Ahsoka - E. K. Johnston'  = ANY(fandom)
-        OR 'Rogue One: A Star Wars Story (2016)'  = ANY(fandom)
-        );
-        """
-        data = pd.read_sql_query(sql2, self.connect)
+        data = pd.read_sql_query(sql, self.connect)
         df = data.explode('kudo_givers')
         return df
 
