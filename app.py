@@ -3,12 +3,9 @@ from flask import Flask, request, render_template
 import pickle
 from markupsafe import Markup
 from db.ao3_db import AO3DB     # type: ignore
-# import utils.paths as path
-# import pandas as pd
 
 app = Flask(__name__)
-# Put model and lookup stuff in it's own library
-NUM_TO_RETURN = 20
+NUM_TO_RETURN = 12
 
 
 def get_meta(work_id):
@@ -16,15 +13,16 @@ def get_meta(work_id):
     # Lookup matrix index for fanwork ID
     work_indice = indices['work_id'][str(work_id)]
     # Find similar items
-    related_BPR = model.similar_items(work_indice)
+    related_BPR = model.similar_items(work_indice, NUM_TO_RETURN)
 
     for work in related_BPR:
         # Find fanwork ID from matrix indices
         suggested_id = inverted_indices['work_id'][work[0]]
         meta = ao3_db.fanwork_select(suggested_id)
         title = meta[1]
+        author = meta[2]
         rating = meta[4]
-        yield suggested_id, title, rating
+        yield suggested_id, title, author
 
 
 def validate(request):
@@ -80,13 +78,14 @@ def predict():
             f"{next(suggestions)[1]}</a>:<br><br>")
         next(suggestions)
         count = 1
-        for suggested_id, title, rating in suggestions:
+        for suggested_id, title, author in suggestions:
             if count > NUM_TO_RETURN:
                 print(f"breaking out at count value: {count}")
                 break
             link = (
-                    f"<a href ='http://ao3.org/works/{suggested_id}'>{count}"
-                    f"-{title}-{rating}</a><br>")
+                    f"{count}. "
+                    f"<a href ='http://ao3.org/works/{suggested_id}'>"
+                    f"{title}</a> ...... by {','.join(author)}<br>")
             response = response + link
             count += 1
         return render_template('index.html',
