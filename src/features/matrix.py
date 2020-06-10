@@ -96,8 +96,6 @@ def create_sparse_matrix(data: np.ndarray,
         indices['work_id'].setdefault(row['work_id'], len(indices['work_id']))
         indices['user'].setdefault(row['kudo_givers'], len(indices['user']))
         data[indices['work_id'][row['work_id']]][indices['user'][row['kudo_givers']]] = 1   # noqa: E501
-        if i%1000 == 0:
-            print(i, " ", end="")
     return data, indices
 
 

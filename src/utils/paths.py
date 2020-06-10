@@ -73,14 +73,10 @@ def meta_log_path(tag: str) -> Path:
 
 
 def matrix_log_path() -> Path:
-    print(f"DEBUG: {cfg.basedir}")
     path = Path() / cfg.basedir / cfg.MODEL_PATH
-    print(f"DEBUG path.py: {path}")
     if not path.exists():
-        print("DEBUG: Path doesn't exists; Attempting to create.")
         path.mkdir(parents=True)
     file_path = path.joinpath(cfg.MODEL_PREFIX + cfg.LOG_SUFFIX)
-    print(f"DEBUG path.py: {file_path}")
     return file_path
 
 

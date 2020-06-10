@@ -75,6 +75,7 @@ class AO3DB():
               WHERE kudo_givers is not Null;
               """
         data = pd.read_sql_query(sql, self.connect)
+        print(f"DEBUG: {data.shape}")
         df = data.explode('kudo_givers')
         return df
 
