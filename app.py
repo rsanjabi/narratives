@@ -80,15 +80,10 @@ def predict():
             f"{next(suggestions)[1]}</a>:<br><br>")
         next(suggestions)
         count = 1
-        # for count, meta in enumerate(suggestions):
         for suggested_id, title, rating in suggestions:
-            # for count in range(NUM_TO_RETURN):
             if count > NUM_TO_RETURN:
                 print(f"breaking out at count value: {count}")
                 break
-            # boop = next(suggestions)
-            # suggested_id, title, rating = meta[0], meta[1], meta[2]
-            # suggested_id, title, rating = boop[0], boop[1], boop[2]
             link = (
                     f"<a href ='http://ao3.org/works/{suggested_id}'>{count}"
                     f"-{title}-{rating}</a><br>")

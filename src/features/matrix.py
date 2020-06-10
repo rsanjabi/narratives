@@ -117,17 +117,13 @@ def store_data(model: bpr_rec,
                meta_df: DataFrame) -> None:
     # Write out model and indices dictionary as pkl files
     # Write out lookup_table/meta_df as csv file
-    # All three will be used for infererncing
+    # All three will be used for inference
 
     with open(paths.pickle_path(), 'wb') as m_out:
         pickle.dump(model, m_out)
 
     with open(paths.inidices_path(), 'wb') as i_out:
         pickle.dump(indices, i_out)
-
-    smaller_df = meta_df[['work_id', 'title', 'author', 'rating']]
-    smaller_df.to_csv(paths.lookup_table_path(), index=False)
-
     return
 
 
@@ -136,17 +132,16 @@ if __name__ == "__main__":
     # kudo_list, meta_list = create_path_list()
 
     db = AO3DB('george', paths.matrix_log_path())
-    kudo_df = db.kudo_matrix()
-    # kudo_df = create_megaframe(kudo_list)
-    # meta_df = create_megaframe(meta_list)
-    meta_df = DataFrame()
-
     logger.info("Reading in kudos.")
     print("Reading in kudos.")
-    empty_df = create_empty_df(kudo_df)
+    kudo_df = db.kudo_matrix()
 
     logger.info("Creating empty matrix.")
     print("Creating empty matrix.")
+    empty_df = create_empty_df(kudo_df)
+
+    logger.info("Creating sparse matrix.")
+    print("Creating sparse matrix.")
     data, indices = create_sparse_matrix(empty_df, kudo_df)
     logger.info(f" completed size: {data.shape}")
     print(f"completed size: {data.shape}")
@@ -157,11 +152,9 @@ if __name__ == "__main__":
     modelBPR = bpr_rec(factors=50, verify_negative_samples=True)
     modelBPR.fit(sp.csr_matrix(data))
 
-    # test_predictions(indices, invert_indices(indices), '13484820')
-
     logger.info("Storing model for late inference.")
     print("Storing model for late inference.")
-    store_data(modelBPR, indices, meta_df)
+    store_data(modelBPR, indices, data)
 
     logger.info("Model building and features engineering complete.")
     print("Model building and features engineering complete.")
