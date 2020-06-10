@@ -92,10 +92,12 @@ def create_sparse_matrix(data: np.ndarray,
     indices: Dict[str, Any] = {'work_id': {}, 'user': {}}
 
     # then go through each line of csv files for values to set to 1
-    for _, row in kudo_df.iterrows():
+    for i, row in kudo_df.iterrows():
         indices['work_id'].setdefault(row['work_id'], len(indices['work_id']))
         indices['user'].setdefault(row['kudo_givers'], len(indices['user']))
         data[indices['work_id'][row['work_id']]][indices['user'][row['kudo_givers']]] = 1   # noqa: E501
+        if i%1000 == 0:
+            print(i, " ", end="")
     return data, indices
 
 
@@ -135,10 +137,12 @@ if __name__ == "__main__":
     logger.info("Reading in kudos.")
     print("Reading in kudos.")
     kudo_df = db.kudo_matrix()
+    print(f"kudo_df size: {kudo_df.shape}")
 
     logger.info("Creating empty matrix.")
     print("Creating empty matrix.")
     empty_df = create_empty_df(kudo_df)
+    print(f"empty_df size: {empty_df.shape}")
 
     logger.info("Creating sparse matrix.")
     print("Creating sparse matrix.")
