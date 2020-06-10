@@ -12,7 +12,7 @@ import config as cfg
 
 class AO3DB():
 
-    def __init__(self, log_name: str, log_path: Path, logger: Logger=None):
+    def __init__(self, log_name: str, log_path: Path, logger: Logger = None):
         self.log_name = log_name
         self.log_path = log_path
         self.cursor, self.connect = self.open()

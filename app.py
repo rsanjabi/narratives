@@ -3,7 +3,7 @@ from flask import Flask, request, render_template
 import pickle
 from markupsafe import Markup
 from db.ao3_db import AO3DB     # type: ignore
-import utils.paths as path
+# import utils.paths as path
 # import pandas as pd
 
 app = Flask(__name__)
