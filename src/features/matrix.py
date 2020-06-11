@@ -73,7 +73,7 @@ def create_empty_df(df: DataFrame) -> np.ndarray:
     num_works = len(df['work_id'].unique())
     num_users = len(df['kudo_givers'].unique())
     # TODO add size to log
-    data = np.zeros((num_works, num_users))
+    data = np.zeros((num_works, num_users), dtype=int)
     return data
 
 
