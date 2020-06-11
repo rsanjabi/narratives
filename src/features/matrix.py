@@ -73,7 +73,7 @@ def create_empty_df(df: DataFrame) -> np.ndarray:
     num_works = len(df['work_id'].unique())
     num_users = len(df['kudo_givers'].unique())
     # TODO add size to log
-    data = np.zeros((num_works, num_users), dtype=int)
+    data = np.zeros((num_works, num_users), dtype=bool)
     return data
 
 
@@ -95,7 +95,7 @@ def create_sparse_matrix(data: np.ndarray,
     for i, row in kudo_df.iterrows():
         indices['work_id'].setdefault(row['work_id'], len(indices['work_id']))
         indices['user'].setdefault(row['kudo_givers'], len(indices['user']))
-        data[indices['work_id'][row['work_id']]][indices['user'][row['kudo_givers']]] = 1   # noqa: E501
+        data[indices['work_id'][row['work_id']]][indices['user'][row['kudo_givers']]] = True   # noqa: E501
     return data, indices
 
 
