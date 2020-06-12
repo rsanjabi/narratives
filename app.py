@@ -74,8 +74,8 @@ def predict():
 
         suggestions = get_meta(fanwork_id)
         response = (
-            f"Suggested works for <a href='http://ao3.org/works/{fanwork_id}'>"
-            f"{next(suggestions)[1]}</a>:<br><br>")
+            f"Suggested works for <a href='http://ao3.org/works/{fanwork_id}'"
+            f" target='_blank'> {next(suggestions)[1]}</a>:<br><br>")
         next(suggestions)
         count = 1
         for suggested_id, title, author in suggestions:
@@ -84,8 +84,10 @@ def predict():
                 break
             link = (
                     f"{count}. "
-                    f"<a href ='http://ao3.org/works/{suggested_id}'>"
-                    f"{title}</a> ...... by {','.join(author)}<br>")
+                    f"<a href ='http://ao3.org/works/{suggested_id}'"
+                    f" target='_blank'> {title}</a> .... by {','.join(author)}"
+                    f"<br>"
+                    )
             response = response + link
             count += 1
         return render_template('index.html',
