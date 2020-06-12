@@ -37,14 +37,14 @@ class DBKudos(AO3DB):
                         """
                     self.cursor.execute(sql, ({**row}))
                     print(f"{row['work_id']}'s kudos added to db.'")
-                    # self.logger.info(f"{row['work_id']}'s kudos added to db.'")
+                    # self.logger.info(f"{row['work_id']}'s kudos in db.'")
                 else:
                     print(f"Fanwork {row['work_id']} not in db")
                     # self.logger.error(f"Fanwork {row['work_id']} not in db")
                     # to be logged to file.
                 self.connect.commit()
             print(f"{batch} has been added to database. Deleting.")
-            # self.logger.info(f"{batch} has been added to database. Deleting.")
+            # self.logger.info(f"{batch} added to database. Deleting.")
             paths.remove_kudo_path(batch)
 
     def _rows(self, batch) -> Generator[Any, None, None]:

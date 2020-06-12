@@ -244,7 +244,7 @@ class DBMeta(AO3DB):
             self.connect.commit()
             # self.logger.info("Table dropped")
         except Exception:
-                self.logger.error("Error dropping table.")
+            self.logger.error("Error dropping table.")
 
     def _rows(self) -> Generator[Any, None, None]:
         with open(self.meta_path, 'r') as f_in:
