@@ -16,7 +16,7 @@ class DBMeta(AO3DB):
         self._table_creation()
 
     def insert(self) -> None:
-        self.logger.info(f"Opening {self.meta_path}")
+        # self.logger.info(f"Opening {self.meta_path}")
         rows = self._rows()
         for row in rows:
             if self.fanwork_exists(row['work_id']):
@@ -84,7 +84,7 @@ class DBMeta(AO3DB):
 
             self.cursor.execute(sql, ({**row}))
             self.connect.commit()
-            self.logger.info(f"{row['work_id']}'s meta added to db.")
+            # self.logger.info(f"{row['work_id']}'s meta added to db.")
             '''
             self.cursor.execute("""
                 INSERT INTO staging_meta (
@@ -232,19 +232,19 @@ class DBMeta(AO3DB):
                 );
             """)
             self.connect.commit()
-            self.logger.info("Created new table")
+            # self.logger.info("Created new table")
         except psycopg2.errors.DuplicateTable:
             self.connect.commit()
-            self.logger.info("Table already exists.")
+            # self.logger.info("Table already exists.")
 
     def _table_drop(self) -> None:
         try:
             sql = 'DROP TABLE staging_meta;'
             self.cursor.execute(sql)
             self.connect.commit()
-            self.logger.info("Table dropped")
+            # self.logger.info("Table dropped")
         except Exception:
-            self.logger.error("Error dropping table.")
+                self.logger.error("Error dropping table.")
 
     def _rows(self) -> Generator[Any, None, None]:
         with open(self.meta_path, 'r') as f_in:

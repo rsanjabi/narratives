@@ -6,7 +6,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Wait time between AO3 requests in seconds
-DELAY = 10
+DELAY = 4
 
 # Location of raw data dumps. Fandom subdirectories will be located here
 META_PATH = '../data/meta/'
@@ -33,7 +33,7 @@ PICKLE_SUFFIX = '.pkl'
 HTTP_HEADERS = {'User-Agent':
                 'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
 
-TEST_FANDOM_LIST = ["Star Wars Prequel Trilogy"]
+TEST_FANDOM_LIST = ["Star Wars - All Media Types"]
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3
