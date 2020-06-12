@@ -119,9 +119,11 @@ def store_data(model: bpr_rec,
     # Write out lookup_table/meta_df as csv file
     # All three will be used for inference
 
+    print(f"Writing model to : {paths.pickle_path}")
     with open(paths.pickle_path(), 'wb') as m_out:
         pickle.dump(model, m_out)
 
+    print(f"Writing indices to : {paths.indices_path}")
     with open(paths.inidices_path(), 'wb') as i_out:
         pickle.dump(indices, i_out)
     return
