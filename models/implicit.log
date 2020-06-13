@@ -1,5 +1,0 @@
-2020-06-09 21:28:47,451-INFO-Reading in kudos.
-2020-06-09 21:29:11,233-INFO-Creating empty matrix.
-2020-06-09 21:29:13,327-INFO-Creating sparse matrix.
-2020-06-09 21:53:50,443-INFO- completed size: (104040, 224425)
-2020-06-09 21:53:50,530-INFO-Training model
