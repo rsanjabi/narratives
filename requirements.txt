@@ -1,5 +1,7 @@
 appdirs==1.4.3
+attrs==19.3.0
 beautifulsoup4==4.9.0
+black==19.10b0
 bs4==0.0.1
 certifi==2020.4.5.1
 chardet==3.0.4
@@ -20,9 +22,10 @@ mccabe==0.6.1
 mypy==0.770
 mypy-extensions==0.4.3
 -e git+https://github.com/rsanjabi/narratives.git@2f681bd804268c9dc7729b01efe3103faef3ef13#egg=narratives&subdirectory=src
-numpy==1.18.4
+numpy==1.18.5
 packaging==20.3
-pandas==1.0.3
+pandas==1.0.4
+pathspec==0.8.0
 pathvalidate==2.3.0
 pluggy==0.13.1
 psycopg2==2.8.5
@@ -32,8 +35,8 @@ pyflakes==2.2.0
 pyparsing==2.4.7
 python-dateutil==2.8.1
 pytz==2020.1
+regex==2020.6.8
 requests==2.23.0
-scipy==1.4.1
 six==1.14.0
 soupsieve==2.0
 toml==0.10.0

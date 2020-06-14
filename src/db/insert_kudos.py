@@ -9,7 +9,7 @@ class DBKudos(AO3DB):
     def __init__(self) -> None:
 
         l_path: Path = paths.kudo_log_path()
-        super().__init__('kudos', l_path)
+        super().__init__("kudos", l_path)
 
     def _next_batch(self):
         while True:
@@ -26,7 +26,7 @@ class DBKudos(AO3DB):
             # self.logger.info(f"Opening {batch}")
             rows = self._rows(batch)
             for row in rows:
-                if super().fanwork_exists(row['work_id']):
+                if super().fanwork_exists(row["work_id"]):
                     sql = """
                         UPDATE staging_meta
                         SET
@@ -48,6 +48,6 @@ class DBKudos(AO3DB):
             paths.remove_kudo_path(batch)
 
     def _rows(self, batch) -> Generator[Any, None, None]:
-        with open(batch, 'r') as f_in:
+        with open(batch, "r") as f_in:
             for row in f_in:
                 yield json.loads(row)

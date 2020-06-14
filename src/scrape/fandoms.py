@@ -8,13 +8,12 @@ from typing import Generator, Any, List
 from scrape.page import Page
 import utils.paths as paths
 import config as cfg
-from db.ao3_db import AO3DB         # type: ignore
+from db.ao3_db import AO3DB  # type: ignore
 
 
 class Fandoms(Page):
-
     def __init__(self):
-        self.log_name = 'fandoms'
+        self.log_name = "fandoms"
         self.log_path = paths.fandom_log_path()
         super().__init__(self.log_name, self.log_path)
 
@@ -27,7 +26,7 @@ class Fandoms(Page):
             results = self._page_elements(soup)
             for fandom in results:
                 fandom_list.append(fandom)
-        with open(paths.fandom_path(), 'w') as f_out:
+        with open(paths.fandom_path(), "w") as f_out:
             f_out.write(json.dumps(fandom_list))
         return fandom_list
 
@@ -40,9 +39,8 @@ class Fandoms(Page):
             yield page
             time.sleep(cfg.DELAY)
 
-    def _page_elements(self,
-                       soup: BeautifulSoup) -> Generator[Any, None, None]:
-        letter_group = soup.find_all(class_='tags index group')
+    def _page_elements(self, soup: BeautifulSoup) -> Generator[Any, None, None]:
+        letter_group = soup.find_all(class_="tags index group")
         for letter in letter_group:
             for title in letter.find_all(class_="tag"):
                 fandom = title.text.strip()
@@ -51,8 +49,4 @@ class Fandoms(Page):
                 x = title.next_sibling.strip()
                 count = x.replace("(", "").replace(")", "")
 
-                yield {
-                    "name": fandom,
-                    "date": date,
-                    "count": count
-                }
+                yield {"name": fandom, "date": date, "count": count}

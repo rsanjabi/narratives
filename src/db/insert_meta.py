@@ -12,14 +12,14 @@ class DBMeta(AO3DB):
     def __init__(self, fandom: str) -> None:
         self.meta_path: Path = paths.meta_path(fandom)
         l_path: Path = paths.meta_log_path(fandom)
-        super().__init__(fandom+'meta_db', l_path)
+        super().__init__(fandom + "meta_db", l_path)
         self._table_creation()
 
     def insert(self) -> None:
         # self.logger.info(f"Opening {self.meta_path}")
         rows = self._rows()
         for row in rows:
-            if self.fanwork_exists(row['work_id']):
+            if self.fanwork_exists(row["work_id"]):
                 sql = """
                     UPDATE staging_meta
                     SET
@@ -200,7 +200,8 @@ class DBMeta(AO3DB):
 
     def _table_creation(self) -> None:
         try:
-            self.cursor.execute("""
+            self.cursor.execute(
+                """
                 CREATE TABLE staging_meta (
                     work_id             TEXT PRIMARY KEY,
                     title               TEXT,
@@ -230,7 +231,8 @@ class DBMeta(AO3DB):
                     kudo_givers         TEXT [],
                     kudo_scr_date       TIMESTAMP
                 );
-            """)
+            """
+            )
             self.connect.commit()
             # self.logger.info("Created new table")
         except psycopg2.errors.DuplicateTable:
@@ -239,7 +241,7 @@ class DBMeta(AO3DB):
 
     def _table_drop(self) -> None:
         try:
-            sql = 'DROP TABLE staging_meta;'
+            sql = "DROP TABLE staging_meta;"
             self.cursor.execute(sql)
             self.connect.commit()
             # self.logger.info("Table dropped")
@@ -247,6 +249,6 @@ class DBMeta(AO3DB):
             self.logger.error("Error dropping table.")
 
     def _rows(self) -> Generator[Any, None, None]:
-        with open(self.meta_path, 'r') as f_in:
+        with open(self.meta_path, "r") as f_in:
             for row in f_in:
                 yield json.loads(row)

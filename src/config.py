@@ -3,52 +3,76 @@
 
 
 import os
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Wait time between AO3 requests in seconds
 DELAY = 4
 
 # Location of raw data dumps. Fandom subdirectories will be located here
-META_PATH = '../data/meta/'
-KUDO_PATH = '../data/kudos/'
-FANDOM_PATH = '../data/fandoms/'
+META_PATH = "../data/meta/"
+KUDO_PATH = "../data/kudos/"
+FANDOM_PATH = "../data/fandoms/"
 
-DATA_PATH = '../data/'
+DATA_PATH = "../data/"
 
-MODEL_PATH = basedir + '/../models/'
+MODEL_PATH = basedir + "/../models/"
 
-TBD_PREFIX = 'tbdeleted'
-PROGRESS_TRACK = '.state'
-INDICES_PREFIX = 'indices'
-MODEL_PREFIX = 'implicit'
-KUDO_PREFIX = 'kudos'
-META_PREFIX = 'meta'
+TBD_PREFIX = "tbdeleted"
+PROGRESS_TRACK = ".state"
+INDICES_PREFIX = "indices"
+MODEL_PREFIX = "implicit"
+KUDO_PREFIX = "kudos"
+META_PREFIX = "meta"
 
-TXT_SUFFIX = '.txt'
-LOG_SUFFIX = '.log'
-DATA_SUFFIX = '.json'
-PICKLE_SUFFIX = '.pkl'
+TXT_SUFFIX = ".txt"
+LOG_SUFFIX = ".log"
+DATA_SUFFIX = ".json"
+PICKLE_SUFFIX = ".pkl"
 
 # HTTP Request Headers
-HTTP_HEADERS = {'User-Agent':
-                'Scraping meta for fan analysis; rebecca.sanjabi@gmail.com'}
+HTTP_HEADERS = {
+    "User-Agent": "Scraping meta for fan analysis; rebecca.sanjabi@gmail.com"
+}
 
 TEST_FANDOM_LIST = ["Star Wars - All Media Types"]
 
 # How many attempts at requesting page before quitting
 MAX_ERRORS = 3
 
-HOST = 'ec2-52-23-14-156.compute-1.amazonaws.com'
+HOST = "ec2-52-23-14-156.compute-1.amazonaws.com"
 
-META_COLS = ['work_id', 'title', 'author', 'gifted', 'rating', 'warnings',
-             'category', 'status', 'fandom', 'relationship', 'characters',
-             'freeforms', 'summary', 'language', 'words', 'chapters',
-             'collections', 'comments', 'kudos', 'bookmarks', 'hits',
-             'series_part', 'series_name', 'updated', 'scrape_date']
+META_COLS = [
+    "work_id",
+    "title",
+    "author",
+    "gifted",
+    "rating",
+    "warnings",
+    "category",
+    "status",
+    "fandom",
+    "relationship",
+    "characters",
+    "freeforms",
+    "summary",
+    "language",
+    "words",
+    "chapters",
+    "collections",
+    "comments",
+    "kudos",
+    "bookmarks",
+    "hits",
+    "series_part",
+    "series_name",
+    "updated",
+    "scrape_date",
+]
 
-SCR_WINDOW = 21          # window for number of days before we rescrape kudos
+SCR_WINDOW = 21  # window for number of days before we rescrape kudos
 
-FANDOM_PAGES = ['https://archiveofourown.org/media/Movies/fandoms']
+FANDOM_PAGES = ["https://archiveofourown.org/media/Movies/fandoms"]
 """
     'https://archiveofourown.org/media/Anime%20*a*%20Manga/fandoms'],            # noqa: E501
                 'https://archiveofourown.org/media/Books%20*a*%20Literature/fandoms',       # noqa: E501

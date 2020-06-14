@@ -1,6 +1,6 @@
-'''
+"""
     Abstract class for generic scraping actions
-'''
+"""
 from abc import ABC, abstractmethod
 import logging
 from logging import Logger
@@ -12,7 +12,6 @@ import config as cfg
 
 
 class Page(ABC):
-
     def __init__(self, log_name: str, log_path: Path):
         self.logger = self._init_log(log_name, log_path)
 
@@ -29,7 +28,7 @@ class Page(ABC):
         pass
 
     def _get_soup(self, url: str) -> BeautifulSoup:
-        ''' Scrape the page, returning success and soup.'''
+        """ Scrape the page, returning success and soup."""
 
         req = requests.get(url, headers=cfg.HTTP_HEADERS)
         try:
@@ -41,14 +40,14 @@ class Page(ABC):
         except RequestException:
             raise RequestException
         else:
-            soup = BeautifulSoup(req.text, 'html.parser')
+            soup = BeautifulSoup(req.text, "html.parser")
             return soup
 
     def _init_log(self, log_name: str, log_path: Path) -> Logger:
         logger = logging.getLogger(log_name)
         logger.setLevel(logging.DEBUG)
-        fh = logging.FileHandler(log_path, mode='a')
-        formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(message)s')
+        fh = logging.FileHandler(log_path, mode="a")
+        formatter = logging.Formatter("%(asctime)s-%(levelname)s-%(message)s")
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         logger.info("********************************")
