@@ -21,7 +21,7 @@ class DBFandoms(AO3DB):
             ;
             """
 
-        iter_fandoms = ({**fandom, } for fandom in fandoms)
+        iter_fandoms = ({**fandom,} for fandom in fandoms)
 
         psycopg2.extras.execute_batch(self.cursor, sql, iter_fandoms)
         self.connect.commit()
