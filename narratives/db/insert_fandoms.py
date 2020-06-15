@@ -3,7 +3,7 @@ from typing import List
 # import json
 import psycopg2.extras
 
-from db.ao3_db import AO3DB
+from narratives.db.ao3_db import AO3DB
 
 
 class DBFandoms(AO3DB):

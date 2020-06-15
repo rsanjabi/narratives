@@ -7,7 +7,7 @@ import logging
 from logging import Logger
 from pathlib import Path
 import psycopg2
-import config as cfg
+import narratives.config as cfg
 
 
 class AO3DB:

@@ -2,7 +2,7 @@
 from flask import Flask, request, render_template
 import pickle
 from markupsafe import Markup
-from db.ao3_db import AO3DB     # type: ignore
+from narratives.db.ao3_db import AO3DB     # type: ignore
 
 app = Flask(__name__)
 NUM_TO_RETURN = 12

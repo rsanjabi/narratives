@@ -1,8 +1,9 @@
+import narratives.config as cfg
+
 from datetime import datetime
 from typing import Optional
 from pathvalidate import replace_symbol
 from pathlib import Path
-import config as cfg
 
 
 def oldest_kudo_path() -> Optional[Path]:

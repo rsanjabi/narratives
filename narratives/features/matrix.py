@@ -15,6 +15,10 @@
             folders?)
 """
 
+from narratives.db.ao3_db import AO3DB
+import narratives.config as cfg
+import narratives.utils.paths as paths
+
 import pickle
 from typing import List, Tuple, Dict, Any
 from pathlib import Path
@@ -27,10 +31,6 @@ import scipy.sparse as sp
 import pandas as pd
 from pandas import DataFrame
 from implicit.bpr import BayesianPersonalizedRanking as bpr_rec
-
-import utils.paths as paths
-from db.ao3_db import AO3DB  # type: ignore
-import config as cfg
 
 
 def create_logger() -> Logger:

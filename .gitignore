@@ -9,10 +9,10 @@ narratives-local.code-workspace
 dump/
 docs/
 notebooks/.ipynb_checkpoints/
-notebooks/Messing Around.ipynb
 
 # Too big
 data/
+models/implicit.log
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
