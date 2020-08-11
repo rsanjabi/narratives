@@ -1,2 +1,3 @@
 [flake8]
 exclude = __pycache__, .vscode, data, docs, dump, env, models, notebooks, venv
+max-line-length = 88

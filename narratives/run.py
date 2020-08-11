@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
-'''
+"""
     Short term code for rudimentary orchestration. To be replaced by Prefect
     or Airflow.
-'''
+"""
 
 
 # from scrape.fandoms import Fandoms
 # from db.insert_fandoms import DBFandoms     # type: ignore
 
-# 
 # from scrape.meta import Meta
-from scrape.kudos import Kudos
-from db.insert_meta import DBMeta       # type: ignore
-from db.insert_kudos import DBKudos     # type: ignore
-import config as cfg
+from narratives.scrape.kudos import Kudos
+from narratives.scrape.fandoms import Fandoms
 
-'''
+# from db.insert_meta import DBMeta       # type: ignore
+from narratives.db.insert_kudos import DBKudos  # type: ignore
+from narratives.db.insert_fandoms import DBFandoms  # type: ignore
+import narratives.config as cfg
+
+
 scraper = Fandoms()
 fandom_list = scraper.scrape()
 
 db_obj = DBFandoms()
 db_obj.insert(fandom_list)
-'''
 
 
 for fandom in cfg.TEST_FANDOM_LIST:
-    '''
+    """
     print(f"Starting to scrape {fandom} meta.")
     try:
         m = Meta(fandom, from_top=False)
@@ -41,7 +42,7 @@ for fandom in cfg.TEST_FANDOM_LIST:
         print(f"Finished inserting meta for : {fandom}")
     except Exception as e:
         print(f"Ran into problem inserting meta with {fandom}: {e}")
-    '''
+    """
     pass
 
 k = Kudos(num_batches=1, batch_size=100)

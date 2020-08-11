@@ -1,6 +1,14 @@
 # narratives
-Stories of scraping stories.
+A fanworks recommender system. Pulls data from Archive of Our Own, including named kudos for works, to create an implicit, item-to-item recommendation. Currently only a sub-network of works have been scraped.  See the web page for details.
 
-https://www.wired.com/story/archive-of-our-own-fans-better-than-tech-organizing-information/
+Elements of architecture:
+* Scrapes a list of all fandoms (not currently used for scraping meta-data, but future releases will use this list for determining what to scrape next)
+* Scrapes meta-data for each individual work, given a fandom
+* Inserts meta-data into a PostgreSQL database.
+* Scrapes the names of kudos for each work in the database.
+* matrix.py generates a recommender model based on implicit library and data in the database at the time.
+* A Flask App does the web-based inference when given a fanworks AO3 ID number, returning a list of 10 IDs (plus meta-data). 
 
-Some files are used and adapted from [AO3Scraper](https://github.com/radiolarian/AO3Scraper) under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+### Caveats
+* Hosted on Heroku hobby tier, there is a lag when visiting the site for the first time, as the Flask app starts.
+* A 

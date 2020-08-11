@@ -7,11 +7,10 @@ import logging
 from logging import Logger
 from pathlib import Path
 import psycopg2
-import config as cfg
+import narratives.config as cfg
 
 
-class AO3DB():
-
+class AO3DB:
     def __init__(self, log_name: str, log_path: Path, logger: Logger = None):
         self.log_name = log_name
         self.log_path = log_path
@@ -25,13 +24,13 @@ class AO3DB():
         self.logger = None
 
     def open(self):
-        ''' Open database connection. Returns cursor and connection '''
+        """ Open database connection. Returns cursor and connection """
         try:
             connect = psycopg2.connect(
-                            host=cfg.HOST,
-                            database=os.environ['DB_NAME'],
-                            user=os.environ['DB_USER'],
-                            password=os.environ['DB_PASS'],
+                host=cfg.HOST,
+                database=os.environ["DB_NAME"],
+                user=os.environ["DB_USER"],
+                password=os.environ["DB_PASS"],
             )
             cur = connect.cursor()
         except Exception as e:
@@ -48,8 +47,8 @@ class AO3DB():
     def _init_log(self) -> Logger:
         logger = logging.getLogger(self.log_name)
         logger.setLevel(logging.DEBUG)
-        fh = logging.FileHandler(self.log_path, mode='a')
-        formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(message)s')
+        fh = logging.FileHandler(self.log_path, mode="a")
+        formatter = logging.Formatter("%(asctime)s-%(levelname)s-%(message)s")
         fh.setFormatter(formatter)
         logger.addHandler(fh)
         logger.info("********************************")
@@ -76,7 +75,7 @@ class AO3DB():
               """
         data = pd.read_sql_query(sql, self.connect)
         print(f"DEBUG: {data.shape}")
-        df = data.explode('kudo_givers')
+        df = data.explode("kudo_givers")
         return df
 
     def kudo_scrape_date(self, work_id: str) -> datetime:
@@ -101,4 +100,4 @@ class AO3DB():
         scr_date = self.kudo_scrape_date(work_id)
         if scr_date is None:
             return False
-        return (scr_date > (datetime.now()-timedelta(cfg.SCR_WINDOW)))
+        return scr_date > (datetime.now() - timedelta(cfg.SCR_WINDOW))
