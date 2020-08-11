@@ -1,5 +1,5 @@
 # narratives
-A fanworks recommender system. Pulls data from Archive of Our Own, including named kudos for works, to create an implicit, item-to-item recommendation. Currently only a sub-network of works have been scraped.  See web page for details.
+A fanworks recommender system. Pulls data from Archive of Our Own, including named kudos for works, to create an implicit, item-to-item recommendation. Currently only a sub-network of works have been scraped.  See the web page for details.
 
 Elements of architecture:
 * Scrapes a list of all fandoms (not currently used for scraping meta-data, but future releases will use this list for determining what to scrape next)
