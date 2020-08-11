@@ -10,9 +10,9 @@ NUM_TO_RETURN = 12
 def get_meta(work_id):
 
     # Lookup matrix index for fanwork ID
-    print(f"DEBUG 1: {indices['work_id']['24670738']}")
+    # print(f"DEBUG 1: {indices['work_id']['24670738']}")
     work_indice = indices["work_id"][str(work_id)]
-    print(f"DEBUG: {work_indice}")
+    # print(f"DEBUG: {work_indice}")
 
     # Find similar items
     related_BPR = model.similar_items(work_indice, NUM_TO_RETURN)
