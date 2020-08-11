@@ -9,5 +9,6 @@ Elements of architecture:
 * matrix.py generates a recommender model based on implicit library and data in the database at the time.
 * A Flask App does the web-based inference when given a fanworks AO3 ID number, returning a list of 10 IDs (plus meta-data). 
 
-### Known Issues
-* 
+### Caveats
+* Hosted on Heroku hobby tier, there is a lag when visiting the site for the first time, as the Flask app starts.
+* A 
